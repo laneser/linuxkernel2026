@@ -50,14 +50,17 @@
 
 **Dev Container** 負責編輯、AI 輔助、版本控制；**實體機**負責編譯與原生效能測試。分離的原因是課程要求效能量測必須在原生 Linux 上進行，虛擬機的 overhead 會干擾結果。
 
+> **參照：** [`linux2025-lab0.md`](references/linux2025-lab0.md) Part A（Checklist 1 警告：「使用原生 Linux 安裝，不要用虛擬機，以確保效能評估準確」）。
+
 ## 4. 解決方案策略
 
-| 策略 | 說明 |
-|------|------|
-| AI 輔助學習 | 透過 Claude CLI + Skills 提供即時的原始碼解釋與概念教學 |
-| 參考文件預載 | 課程教材存於 `docs/references/`，降低重複查找的溝通成本 |
-| 雙機分離 | VM 負責開發，實體機負責原生測試，透過 SSH 連接 |
-| 漸進式深入 | 從 lab0 的 queue 實作開始，逐步展開至 kernel 子系統 |
+| 策略 | 說明 | 參照 |
+|------|------|------|
+| AI 輔助學習 | 透過 Claude CLI + Skills 提供即時的原始碼解釋與概念教學 | [`ai-guidelines.md`](references/ai-guidelines.md) |
+| 參考文件預載 | 課程教材存於 `docs/references/`，降低重複查找的溝通成本 | [`linux-course-schedule.md`](references/linux-course-schedule.md) |
+| 雙機分離 | VM 負責開發，實體機負責原生測試，透過 SSH 連接 | [`linux2025-lab0.md`](references/linux2025-lab0.md) Part A |
+| 開發工具標準化 | 遵循課程指定的 GNU/Linux 工具鏈 | [`gnu-linux-dev.md`](references/gnu-linux-dev.md) |
+| 漸進式深入 | 從 lab0 的 queue 實作開始，逐步展開至 kernel 子系統 | [`linux2025-review.md`](references/linux2025-review.md) |
 
 ## 5. 建構區塊視角
 
@@ -93,10 +96,23 @@ devcontainer.json 設定：
 - **最低需求：** 任何 x86_64 Linux 機器（不需 GUI）
 - **必要套件：**
   ```shell
+  # 編譯與程式碼品質（參照 lab0-a 開發環境設定）
   sudo apt install build-essential git valgrind cppcheck clang-format \
-                   wamerican aspell colordiff linux-tools-common
+                   wamerican aspell colordiff
+
+  # 效能分析（參照 gnu-linux-dev.md — Perf 章節）
+  sudo apt install linux-tools-common linux-tools-generic linux-tools-$(uname -r)
+
+  # 數據視覺化（參照 gnu-linux-dev.md — gnuplot 章節）
+  sudo apt install gnuplot
+
+  # SSH 環境下的編輯器
+  sudo apt install vim
   ```
 - **服務：** sshd
+
+> **套件來源：** 編譯工具參照 [`linux2025-lab0.md`](references/linux2025-lab0.md) Part A；
+> perf 與 gnuplot 參照 [`gnu-linux-dev.md`](references/gnu-linux-dev.md)。
 
 #### SSH 設定
 
