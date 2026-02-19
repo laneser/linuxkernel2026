@@ -30,9 +30,16 @@
 
 ## 開發環境
 
-- VS Code + Dev Container (Ubuntu Noble)
-- Claude CLI
-- uv + Python 3.12（`~/.local/bin/uv`）— 需要撰寫腳本、資料處理、或任何程式輔助時，優先使用 `uv run` 執行 Python
+本專案採用雙機架構（詳見 [`docs/ARC42.md`](docs/ARC42.md) §7 部署視角）：
+
+- **Dev Container (VM)** — VS Code + Claude CLI + uv/Python 3.12，負責編輯、AI 討論、git 操作
+- **實體 Linux 機器** — 透過 SSH 連接，負責編譯與原生效能測試（valgrind, perf）
+  - SSH 設定：host `lab0`（定義於 `~/.ssh/config`）
+  - 同步程式碼：`rsync -avz --exclude='.git' <src> lab0:~/lab0-c/`
+  - 遠端測試：`ssh lab0 'cd ~/lab0-c && make && make test'`
+  - **狀態：尚未設定，待取得硬體**
+
+需要撰寫腳本或資料處理時，優先使用 `uv run` 執行 Python。
 
 ## 慣例
 

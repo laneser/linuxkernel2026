@@ -31,11 +31,33 @@
 
 ## 3. 上下文與範圍
 
-<!-- TODO: 繪製系統上下文圖 -->
+```
+┌──────────────┐          ┌─────────────────────────────┐
+│   學習者     │◄────────►│  Dev Container (VM)         │
+│              │  VS Code │  - Claude CLI + Skills       │
+└──────────────┘          │  - uv + Python 3.12         │
+                          │  - 編輯、AI 討論、git 操作   │
+                          └──────────┬──────────────────┘
+                                     │ SSH (rsync + 遠端命令)
+                                     ▼
+                          ┌─────────────────────────────┐
+                          │  實體 Linux 機器 (lab0)      │
+                          │  - gcc, make, valgrind, perf │
+                          │  - 原生效能測試與分析        │
+                          │  - 無 GUI，僅 sshd           │
+                          └─────────────────────────────┘
+```
+
+**Dev Container** 負責編輯、AI 輔助、版本控制；**實體機**負責編譯與原生效能測試。分離的原因是課程要求效能量測必須在原生 Linux 上進行，虛擬機的 overhead 會干擾結果。
 
 ## 4. 解決方案策略
 
-<!-- TODO: 描述整體技術策略 -->
+| 策略 | 說明 |
+|------|------|
+| AI 輔助學習 | 透過 Claude CLI + Skills 提供即時的原始碼解釋與概念教學 |
+| 參考文件預載 | 課程教材存於 `docs/references/`，降低重複查找的溝通成本 |
+| 雙機分離 | VM 負責開發，實體機負責原生測試，透過 SSH 連接 |
+| 漸進式深入 | 從 lab0 的 queue 實作開始，逐步展開至 kernel 子系統 |
 
 ## 5. 建構區塊視角
 
@@ -47,7 +69,63 @@
 
 ## 7. 部署視角
 
-<!-- TODO: 描述部署架構 -->
+### 雙機部署架構
+
+#### Dev Container（VM 端）
+
+- **用途：** 程式碼編輯、Claude AI 對話、git 操作、文件撰寫
+- **基礎映像：** `mcr.microsoft.com/devcontainers/base:noble`
+- **工具：** VS Code, Claude CLI, uv + Python 3.12
+- **SSH 連線：** 透過 bind mount host 的 `~/.ssh` 存取 SSH key
+
+devcontainer.json 設定：
+```jsonc
+{
+    "mounts": [
+        "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,readonly"
+    ]
+}
+```
+
+#### 實體 Linux 機器（測試端）
+
+- **用途：** 編譯、執行、效能測試（valgrind, perf, massif）
+- **最低需求：** 任何 x86_64 Linux 機器（不需 GUI）
+- **必要套件：**
+  ```shell
+  sudo apt install build-essential git valgrind cppcheck clang-format \
+                   wamerican aspell colordiff linux-tools-common
+  ```
+- **服務：** sshd
+
+#### SSH 設定
+
+Host 端 `~/.ssh/config`：
+```
+Host lab0
+    HostName <實體機 IP>
+    User <username>
+    IdentityFile ~/.ssh/id_ed25519
+```
+
+#### 遠端測試工作流程
+
+```shell
+# 從 Dev Container 內操作：
+# 1. 同步程式碼至實體機
+rsync -avz --exclude='.git' /path/to/lab0-c/ lab0:~/lab0-c/
+
+# 2. 遠端編譯與測試
+ssh lab0 'cd ~/lab0-c && make clean && make && make test'
+
+# 3. 遠端 valgrind 分析
+ssh lab0 'cd ~/lab0-c && make valgrind'
+
+# 4. 遠端效能分析
+ssh lab0 'cd ~/lab0-c && perf stat ./qtest -f traces/trace-14-perf.cmd'
+```
+
+> **狀態：** 實體機尚未設定，待取得硬體後補完。
 
 ## 8. 橫切關注點
 
@@ -73,3 +151,5 @@
 | Claude CLI | Anthropic 的命令列 AI 助手 |
 | Claude Skills | Claude CLI 中可自訂的指令快捷方式 |
 | ARC42 | 軟體架構文件模板 |
+| lab0-c | 課程第一份作業的 repository（`sysprog21/lab0-c`） |
+| 實體機 | 用於原生效能測試的 Linux 實體機器，透過 SSH 連接 |
