@@ -4,6 +4,8 @@
 > **擷取日期：** 2026-02-19
 > **用途：** 課程第一份作業規格（2025 版，待更新為 2026）
 > **子頁面：** lab0-a ~ lab0-f
+> **涵蓋度：** 摘要（約 4%）
+> **省略內容：** Part A 完整 Git hook 設定與 clang-format 流程、Part B Valgrind 完整範例與 signal handling、Part C web server 程式碼與 select() I/O 多工、Part D Fisher-Yates shuffle 與統計檢定數學推導、Part E list_sort.c 演算法深入分析（原文最長約 2800 行）、Part F 完整繳交規格
 
 ---
 

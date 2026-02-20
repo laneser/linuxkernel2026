@@ -5,6 +5,7 @@
 > **授權：** Creative Commons Attribution – Share Alike 4.0
 > **擷取日期：** 2026-02-20
 > **用途：** Linux kernel device driver 開發入門（device model + Device Tree）
+> **涵蓋度：** 完整（中文摘譯）
 
 ---
 

@@ -5,6 +5,8 @@
 > **PDF 下載：** <https://github.com/sysprog21/lkmpg/releases>
 > **擷取日期：** 2026-02-20
 > **用途：** Linux kernel module 開發參考（課程 Week 13 起使用）
+> **涵蓋度：** 索引（僅章節目錄）
+> **省略內容：** 全書 20+ 章節完整內容（線上閱讀：https://sysprog21.github.io/lkmpg/）
 
 ---
 

@@ -54,7 +54,7 @@ graph LR
 | 策略 | 說明 | 參照 |
 |------|------|------|
 | AI 輔助學習 | 透過 Claude CLI + Skills 提供即時的原始碼解釋與概念教學 | [`ai-guidelines.md`](references/ai-guidelines.md) |
-| 參考文件預載 | 課程教材存於 `docs/references/`，降低重複查找的溝通成本 | [`linux-course-schedule.md`](references/linux-course-schedule.md) |
+| 參考文件漸進式揭露 | 課程教材以摘要存於 `docs/references/`，需要時從原始出處按需抓取完整內容 | ADR-007 |
 | 雙機分離 | VM 負責開發，實體機負責原生測試，透過 SSH 連接 | [`linux2025-lab0.md`](references/linux2025-lab0.md) Part A |
 | 開發工具標準化 | 遵循課程指定的 GNU/Linux 工具鏈 | [`gnu-linux-dev.md`](references/gnu-linux-dev.md) |
 | 漸進式深入 | 從 lab0 的 queue 實作開始，逐步展開至 kernel 子系統 | [`linux2025-review.md`](references/linux2025-review.md) |
@@ -249,6 +249,7 @@ ssh lab0 'cd ~/lab0-c && perf stat ./qtest -f traces/trace-14-perf.cmd'
 - **決策：** 課程教材以 Markdown 檔存放於 `docs/references/`，在 `CLAUDE.md` 中指示 Claude 優先引用
 - **原因：** 參考文件是靜態資料，不是工作流程；Skill 的 description 會永久佔用 context，不適合大量參考資料
 - **參照：** AI guidelines 同樣採此模式（見 §8）
+- **延伸：** ADR-007 進一步定義參考文件的分層存放策略
 
 ### ADR-002：雙機分離架構
 
@@ -300,6 +301,35 @@ ssh lab0 'cd ~/lab0-c && perf stat ./qtest -f traces/trace-14-perf.cmd'
 - **替代方案：**
   - 使用 HackMD 官方 CLI — 截至 2026 年無官方 CLI 工具
   - 手動在瀏覽器操作 — 無法從 Claude 對話中自動化
+
+### ADR-007：參考文件採漸進式揭露策略
+
+- **決策：** `docs/references/` 中的檔案根據來源品質決定本地存放深度，採用分層快取模式
+- **分層策略：**
+  - **第一層（本地摘要）：** 所有參考檔案至少包含 metadata header（原始出處、擷取日期、用途、涵蓋度、省略內容）+ 結構化摘要。Claude 先讀本地摘要判斷是否足以回答
+  - **第二層（按需取用）：** 當來源結構良好（HackMD 等有清晰 Markdown 標題的頁面），Claude 根據「省略內容」欄位判斷需要哪些段落，直接從「原始出處」URL 抓取
+  - **例外（本地完整版）：** 當來源結構不佳（PDF、無分段長文、格式不利於 WebFetch）時，本地存放經整理的完整版
+- **判斷標準：**
+  - 來源有清晰 Markdown 標題層次 → 存摘要，按需 fetch
+  - 來源是 PDF 或無結構文本 → 本地存完整整理版
+  - 多子頁 HackMD book → 存索引 + 各子頁 URL，按需 fetch 個別子頁
+- **Metadata 格式：**
+  ```
+  > **原始出處：** URL
+  > **擷取日期：** YYYY-MM-DD
+  > **用途：** 說明
+  > **涵蓋度：** 完整 / 摘要（約 N%）
+  > **省略內容：** 被省略的主要段落（僅摘要版填寫）
+  ```
+- **原因：**
+  - 完整抓取所有參考文件會導致 repo 膨脹（僅 lab0 就有 ~77,000 字 / 6 子頁面）
+  - 大部分課程教材在 HackMD 上結構良好，不需重複存放
+  - 摘要 + metadata 讓 Claude 能快速判斷「是否需要更多」及「去哪裡找」
+  - 來源品質差的文件（如 PDF）則必須本地整理，否則 Claude 無法有效按需取用
+- **替代方案：**
+  - 全部完整存放 — repo 過大，維護成本高，內容易過時
+  - 全部只存 URL — Claude 每次都要 fetch，慢且不穩定（HackMD SPA 偶爾 WebFetch 失敗）
+- **延伸自：** ADR-001
 
 ## 10. 品質需求
 

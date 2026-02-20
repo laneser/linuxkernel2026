@@ -3,6 +3,8 @@
 > **原始出處：** <https://hackmd.io/@sysprog/gnu-linux-dev/>
 > **擷取日期：** 2026-02-19
 > **用途：** 課程開發工具參考（常設文件，非年份性）
+> **涵蓋度：** 摘要（約 15%）
+> **省略內容：** 各子頁面完整內容（雙系統安裝、HackMD 使用、Markdown 語法、VS Code 設定、terminal/Vim 操作、Perf 效能分析、gnuplot 繪圖）
 
 ---
 

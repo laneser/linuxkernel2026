@@ -3,6 +3,8 @@
 > **原始出處：** <https://hackmd.io/@sysprog/git-with-github>
 > **擷取日期：** 2026-02-19
 > **用途：** 課程 Git 工作流程參考
+> **涵蓋度：** 摘要（約 5%）
+> **省略內容：** Git 安裝設定、SSH key 產生步驟、commit/branching/rebase 完整教學、remote repository 操作、stash/patch 使用、除錯工具、verify commit 設定
 
 ---
 

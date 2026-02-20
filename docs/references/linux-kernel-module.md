@@ -3,6 +3,8 @@
 > **原始出處：** <https://hackmd.io/@sysprog/linux-kernel-module>
 > **擷取日期：** 2026-02-20
 > **用途：** Linux kernel module 深入機制分析（與 LKMPG 互補）
+> **涵蓋度：** 摘要（約 30%）
+> **省略內容：** Hello World 完整建構步驟、fibdrv 完整程式碼、insmod/finit_module 系統呼叫追蹤細節、ELF .modinfo 段分析、sysfs 實作細節、lkm-hidden 自我隱藏模組完整分析
 
 ---
 
