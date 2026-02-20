@@ -322,3 +322,33 @@
 - [ ] Ch.12 — Synchronization
 - [ ] Ch.15 — Scheduling Tasks
 - [ ] Ch.16 — Interrupt Handlers
+
+---
+
+## L. Linux 核心模組運作原理
+
+> 參照：[`linux-kernel-module.md`](references/linux-kernel-module.md)
+> 原始出處：<https://hackmd.io/@sysprog/linux-kernel-module>
+> 與 LKMPG 互補——LKMPG 側重入門教學，本文側重底層機制。
+
+### 基礎與環境
+
+- [ ] Kernel headers 安裝與 Secure Boot 設定
+- [ ] Hello World module 編譯、載入（insmod）、卸載（rmmod）
+
+### 內部機制
+
+- [ ] MODULE_* 巨集展開流程（MODULE_INFO → __MODULE_INFO → `.modinfo` ELF section）
+- [ ] Module 載入 syscall 流程（`finit_module` → `load_module` → `do_init_module`）
+- [ ] `module_init()` 函式別名機制（alias → `init_module`）
+- [ ] `.ko` 檔案的 ELF 結構分析（readelf, objdump）
+
+### 實作範例
+
+- [ ] fibdrv — Fibonacci 數列 character device module
+- [ ] Sysfs 整合（`/sys/module/` 目錄結構）
+
+### 進階主題
+
+- [ ] 可自我隱藏的 kernel module（lkm-hidden）
+- [ ] `kallsyms_lookup_name`、`list_del`、`rb_erase`、`kobject_del` 的運用
