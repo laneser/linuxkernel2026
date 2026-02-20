@@ -1,2 +1,5 @@
 # Claude CLI local settings (per-machine permissions)
 .claude/settings.local.json
+
+# Personal learning progress (per-user, see docs/learning-checklist.md)
+.learning-progress.md

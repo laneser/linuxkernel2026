@@ -41,6 +41,15 @@
 
 需要撰寫腳本或資料處理時，優先使用 `uv run` 執行 Python。
 
+## 學習進度追蹤
+
+本專案使用 Markdown checkbox 追蹤學習進度（詳見 [`docs/ARC42.md`](docs/ARC42.md) §5）：
+
+- **通用模板：** [`docs/learning-checklist.md`](docs/learning-checklist.md)（git tracked）— 定義所有學習項目
+- **個人進度：** `.learning-progress.md`（gitignored）— 使用者的完成狀態與筆記
+
+Claude 可讀取個人進度，根據學習狀態建議下一步方向。模板更新時，協助將新項目 merge 進個人進度。
+
 ## 慣例
 
 - 文件語言以**繁體中文**為主

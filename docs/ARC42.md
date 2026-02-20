@@ -64,11 +64,83 @@
 
 ## 5. 建構區塊視角
 
-<!-- TODO: 描述主要元件與其關係 -->
+```
+┌─────────────────────────────────────────────────────┐
+│                 本專案 (git tracked)                  │
+│                                                      │
+│  docs/learning-checklist.md  ◄── 通用學習模板        │
+│  docs/references/*           ◄── 課程參考文件        │
+│  docs/ARC42.md               ◄── 架構文件            │
+│  CLAUDE.md                   ◄── AI 行為指引         │
+│  .claude/skills/*            ◄── Claude Skills       │
+└──────────────────────┬──────────────────────────────┘
+                       │ 首次使用時從模板產生
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│              個人檔案 (gitignored)                    │
+│                                                      │
+│  .learning-progress.md       ◄── 個人學習進度        │
+│  .claude/settings.local.json ◄── Claude 本地權限     │
+└─────────────────────────────────────────────────────┘
+```
+
+### 學習進度追蹤系統
+
+| 元件 | 路徑 | 追蹤 | 說明 |
+|------|------|------|------|
+| 通用模板 | `docs/learning-checklist.md` | git | 定義所有學習項目，隨課程進度擴充 |
+| 個人進度 | `.learning-progress.md` | gitignored | 使用者的完成狀態與筆記 |
+
+**運作方式：**
+
+1. 通用模板以 Markdown checkbox 格式定義學習項目，按主題分類
+2. 首次使用時，Claude 從模板產生個人進度檔
+3. 使用者學習過程中打勾並加註筆記（`<!-- 日期 備註 -->`）
+4. Claude 讀取個人進度後，能根據狀態建議下一步學習方向
+5. 模板更新時（課程推進新增項目），Claude 協助將新項目 merge 進個人進度
+
+**格式範例：**
+
+通用模板（`docs/learning-checklist.md`）：
+```markdown
+## 開發工具基礎
+- [ ] Git 基本操作（commit, stage, push）
+- [ ] Git rebase 與 interactive rebase
+- [ ] Makefile 語法
+```
+
+個人進度（`.learning-progress.md`）：
+```markdown
+## 開發工具基礎
+- [x] Git 基本操作（commit, stage, push） <!-- 2026-02-20 熟練 -->
+- [ ] Git rebase 與 interactive rebase <!-- 需要練習 conflict resolution -->
+- [ ] Makefile 語法
+```
+
+**設計考量：**
+- 使用 Markdown 而非 YAML/JSON — 人機皆可直接讀寫，VS Code 可直接打勾，GitHub 上預覽直覺
+- 個人進度不進 git — 每個人的起點與過程不同，避免衝突
+- Claude 可同時讀取模板與進度 — 比對差異，提供個人化建議
 
 ## 6. 執行期視角
 
-<!-- TODO: 描述關鍵執行場景 -->
+### 典型學習流程
+
+```
+學習者開啟 Claude CLI
+        │
+        ▼
+Claude 讀取 .learning-progress.md
+        │
+        ▼
+根據進度建議學習方向 ──► 參照 docs/references/* 提供教學
+        │
+        ▼
+學習者完成項目 ──► 更新 .learning-progress.md 打勾
+        │
+        ▼
+需要測試時 ──► SSH 至實體機執行 make test / valgrind / perf
+```
 
 ## 7. 部署視角
 
@@ -145,11 +217,39 @@ ssh lab0 'cd ~/lab0-c && perf stat ./qtest -f traces/trace-14-perf.cmd'
 
 ## 8. 橫切關注點
 
-<!-- TODO: 描述跨元件的共通議題 -->
+### 個人資料隔離
+
+個人化檔案（學習進度、Claude 本地設定）一律 gitignore，確保：
+- 多人共用同一份模板不會互相干擾
+- 不會意外將個人筆記推至公開 repository
+
+### 術語一致性
+
+所有中文技術文件遵循 [`it-vocabulary.md`](references/it-vocabulary.md) 的術語規範，關鍵術語內嵌於 `CLAUDE.md` 確保 Claude 每次對話自動套用。
+
+### AI 使用規範
+
+課程要求學習者展現 substantial personal contribution。Claude 在協助作業時須遵循 [`ai-guidelines.md`](references/ai-guidelines.md)，必要時主動提醒使用者注意引用揭露與開發過程文件化。
 
 ## 9. 架構決策
 
-<!-- TODO: 記錄重要的架構決策 (ADR) -->
+### ADR-001：參考文件存放於 `docs/references/` 而非 Claude Skill
+
+- **決策：** 課程教材以 Markdown 檔存放於 `docs/references/`，在 `CLAUDE.md` 中指示 Claude 優先引用
+- **原因：** 參考文件是靜態資料，不是工作流程；Skill 的 description 會永久佔用 context，不適合大量參考資料
+- **參照：** AI guidelines 同樣採此模式（見 §8）
+
+### ADR-002：雙機分離架構
+
+- **決策：** Dev Container 負責編輯與 AI，實體機負責編譯與原生測試
+- **原因：** 課程明確要求效能量測在原生 Linux 進行；實體機不需 GUI，資源需求低
+- **參照：** [`linux2025-lab0.md`](references/linux2025-lab0.md) Part A
+
+### ADR-003：學習進度以 Markdown Checkbox 追蹤
+
+- **決策：** 通用模板（git tracked）+ 個人進度檔（gitignored），皆為 Markdown 格式
+- **原因：** Markdown checkbox 人機皆可讀寫；Claude 可直接比對模板與進度差異；不需額外 parser
+- **替代方案：** YAML（更結構化但人工編輯不直覺）、資料庫（過度工程化）
 
 ## 10. 品質需求
 
@@ -169,3 +269,6 @@ ssh lab0 'cd ~/lab0-c && perf stat ./qtest -f traces/trace-14-perf.cmd'
 | ARC42 | 軟體架構文件模板 |
 | lab0-c | 課程第一份作業的 repository（`sysprog21/lab0-c`） |
 | 實體機 | 用於原生效能測試的 Linux 實體機器，透過 SSH 連接 |
+| 通用模板 | `docs/learning-checklist.md`，定義所有學習項目的 Markdown checklist |
+| 個人進度 | `.learning-progress.md`，使用者的學習完成狀態（gitignored） |
+| ADR | Architecture Decision Record，架構決策紀錄 |
