@@ -5,7 +5,9 @@
 	},
 
 	"features": {
-		"ghcr.io/devcontainers/features/github-cli:1": {}
+		// Install GitHub CLI and Claude Code
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/stu-bell/devcontainer-features/claude-code:0": {}
 	},
 
 	"remoteUser": "vscode"

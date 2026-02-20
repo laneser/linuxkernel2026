@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     sudo \
     git \
+    jq \
     # 課程開發工具（參照 linux2025-lab0.md Part A）
     build-essential \
     valgrind \
@@ -17,7 +18,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # 建立 vscode 使用者（devcontainer 慣例）
-RUN groupadd -g 1000 vscode \
+# ubuntu:24.04 已內建 uid/gid 1000 的 ubuntu 使用者，先移除
+RUN userdel -r ubuntu 2>/dev/null; groupdel ubuntu 2>/dev/null; \
+    groupadd -g 1000 vscode \
     && useradd -m -s /bin/bash -u 1000 -g 1000 vscode \
     && echo "vscode ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/vscode
 
