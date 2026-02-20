@@ -379,3 +379,62 @@
 - [ ] I2C driver 的 `probe()` / `remove()` 實作分析
 - [ ] 三種裝置配對方式（I2C name、DT compatible、ACPI ID）
 - [ ] Framework 結構與 bus 結構的互相引用模式
+
+---
+
+## N. 課程作業 kxo（井字棋核心模組）
+
+> 參照：[`linux2025-kxo.md`](references/linux2025-kxo.md)
+> 原始出處：<https://hackmd.io/@sysprog/linux2025-kxo>
+
+### Part A：定點數運算與 AI 演算法
+
+- [ ] Kernel 不用浮點數的原因（FPU 管理、CVE-2018-3665）
+- [ ] 定點數運算（Qm.f 表示法、加減乘除）
+- [ ] Linux load average 計算（指數平滑、`fixed_power_int()`）
+- [ ] MCTS 四步驟（Selection, Expansion, Simulation, Backpropagation）
+- [ ] UCT 公式與 exploration-exploitation 平衡
+- [ ] 定點數開平方根與對數實作
+
+### Part B：Kernel Module 與效能分析（ksort）
+
+- [ ] 字元裝置驅動架構（`file_operations`, `/dev/sort`）
+- [ ] `copy_from_user()` / `copy_to_user()` 資料搬移
+- [ ] ktime_t 高精度計時（`ktime_get()`, `ktime_sub()`）
+- [ ] CPU affinity（`taskset`, `isolcpus`）
+- [ ] 效能量測環境設定（關閉 ASLR、Turbo Boost、SMT）
+- [ ] Z-score 離群值過濾
+
+### Part C：Kernel 並行處理（simrupt）
+
+- [ ] 中斷處理 top half / bottom half 架構
+- [ ] Softirq 機制與 `ksoftirqd`
+- [ ] Tasklet 特性與排程
+- [ ] Workqueue 與 worker thread
+- [ ] KFIFO 環形緩衝區（Single Producer–Single Consumer）
+- [ ] Fast circular buffer（power-of-2、bitwise 操作）
+- [ ] 記憶體屏障（`READ_ONCE`, `smp_rmb`, `smp_wmb`）
+- [ ] simrupt 完整資料流走讀
+
+### Part D：對奕核心模組
+
+- [ ] kxo 模組架構（MCTS vs Negamax 雙 AI 對奕）
+- [ ] 棋盤位元編碼與勝利偵測（nibble + arithmetic）
+- [ ] Popcount 最佳化（branchless 實作）
+- [ ] Modulo-3 無除法實作
+- [ ] sysfs 控制介面（`DEVICE_ATTR_RW()`）
+- [ ] 跨 CPU 同步（memory ordering / acquire-release）
+
+### Part E：資訊理論與亂數
+
+- [ ] Shannon entropy 公式與壓縮應用
+- [ ] LFSR（Fibonacci / Galois）與 kernel `lib/random32.c`
+- [ ] Scrambled linear generators（xoroshiro128+, xoshiro256）
+- [ ] Fisher-Yates shuffle 的 seed 獨立性問題
+
+### Part F：作業要求
+
+- [ ] 縮減 user-kernel 通訊成本
+- [ ] Coroutine 實作（非 POSIX thread）
+- [ ] User-space 算繪 + bitops 最小化通訊
+- [ ] 移植強化學習至 kernel module
