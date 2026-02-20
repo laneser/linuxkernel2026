@@ -438,3 +438,51 @@
 - [ ] Coroutine 實作（非 POSIX thread）
 - [ ] User-space 算繪 + bitops 最小化通訊
 - [ ] 移植強化學習至 kernel module
+
+---
+
+## O. Linux 中斷處理與現代架構考量
+
+> 參照：[`linux-interrupt.md`](references/linux-interrupt.md)
+> 原始出處：<https://hackmd.io/@sysprog/linux-interrupt>
+> 與 kxo Part C（simrupt）直接相關。
+
+### 硬體中斷基礎
+
+- [ ] PIC 機制（IRQ → vector 轉譯、優先級、masking）
+- [ ] Edge-triggered vs Level-triggered 差異
+
+### 上半部與下半部
+
+- [ ] Top half 設計原則（快速、不可阻塞、hardware-critical）
+- [ ] Bottom half 三種機制選擇（softirq / tasklet / workqueue）
+
+### Softirq
+
+- [ ] `softirq_action` 結構與 `__do_softirq()` 流程
+- [ ] `ksoftirqd` 每 CPU 一個執行緒的設計
+- [ ] `local_irq_disable()` / `local_irq_enable()` 的使用時機
+
+### Tasklet
+
+- [ ] Tasklet 與 softirq 的關係（建構於 softirq 之上）
+- [ ] `tasklet_schedule()` / `tasklet_hi_schedule()` 使用方式
+- [ ] 同一 tasklet 不會在不同 CPU 並行的保證
+
+### Workqueue
+
+- [ ] `create_workqueue()` / `schedule_work()` API
+- [ ] Workqueue vs Tasklet 差異（process context vs atomic context）
+- [ ] 可休眠（sleep）的延遲處理應用場景
+
+### Threaded Interrupts 與 PREEMPT_RT
+
+- [ ] Threaded interrupt 概念（sleeping spinlock 支援）
+- [ ] PREEMPT_RT patch 的中斷處理策略
+- [ ] Linux 2.6.30 合併的 threaded interrupt API
+
+### 虛擬化與中斷（GIC-400）
+
+- [ ] ARM GIC-400 四大組件（Distributor, CPU interface, GICH, GICV）
+- [ ] TrustZone 整合與安全中斷
+- [ ] Hypervisor 虛擬中斷控制機制
