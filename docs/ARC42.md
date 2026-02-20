@@ -126,7 +126,8 @@ graph TB
 ```mermaid
 flowchart TD
     A["學習者開啟 Claude CLI"] --> B["Claude 讀取 .learning-progress.md"]
-    B --> C["根據進度建議學習方向"]
+    B --> V["觀看對應進度的上課錄影"]
+    V --> C["根據進度建議學習方向"]
     C -- "參照 docs/references/*" --> D["提供教學與討論"]
     D --> E["學習者完成項目"]
     E --> F["更新 .learning-progress.md 打勾"]
