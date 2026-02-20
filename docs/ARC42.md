@@ -145,19 +145,24 @@ flowchart TD
 #### Dev Container（VM 端）
 
 - **用途：** 程式碼編輯、Claude AI 對話、git 操作、文件撰寫
-- **基礎映像：** `mcr.microsoft.com/devcontainers/base:noble`
-- **工具：** VS Code, Claude CLI, uv + Python 3.12, gh CLI
+- **基礎映像：** `ubuntu:24.04`（透過自訂 Dockerfile 建置）
+- **預裝工具：**
+  - 基礎：curl, git, sudo
+  - 課程開發（參照 lab0 Part A）：build-essential, valgrind, cppcheck, clang-format, wamerican, aspell, colordiff
+  - Python：uv + Python 3.12
+  - GitHub：gh CLI（透過 devcontainer feature）
 - **SSH 連線：** 透過 bind mount host 的 `~/.ssh` 存取 SSH key
 
 devcontainer.json 設定：
 ```jsonc
 {
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
     "features": {
         "ghcr.io/devcontainers/features/github-cli:1": {}
     },
-    "mounts": [
-        "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,readonly"
-    ]
+    "remoteUser": "vscode"
 }
 ```
 
