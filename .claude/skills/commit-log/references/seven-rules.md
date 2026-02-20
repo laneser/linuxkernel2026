@@ -25,6 +25,11 @@ Bad:
 - Fixed bug with Y _(past tense)_
 - Changing behavior of X _(gerund)_
 - More fixes for broken stuff _(vague)_
+- fix: resolve null pointer crash _(conventional commit prefix)_
+- Update qtest.c _(filename only)_
+- Fix _(single word)_
+- Implement `q_sort` function _(backticks in subject)_
+- Add sorting (merge sort) _(parentheses in subject)_
 
 ## Body format
 
@@ -43,6 +48,6 @@ are making this change as opposed to how (the code explains that).
  - Typically a hyphen is used for the bullet, preceded by a single
    space, with blank lines in between
 
-Resolves: #123
+Close #123
 See also: #456, #789
 ```
