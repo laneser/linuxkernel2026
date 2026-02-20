@@ -352,3 +352,30 @@
 
 - [ ] 可自我隱藏的 kernel module（lkm-hidden）
 - [ ] `kallsyms_lookup_name`、`list_del`、`rb_erase`、`kobject_del` 的運用
+
+---
+
+## M. Introduction to Linux Kernel Driver Programming
+
+> 參照：[`intro-kernel-driver-programming.md`](references/intro-kernel-driver-programming.md)
+> 原始 PDF：[Bootlin / Michael Opdenacker (Linux Foundation)](https://events19.linuxfoundation.org/wp-content/uploads/2017/12/Introduction-to-Linux-Kernel-Driver-Programming-Michael-Opdenacker-Bootlin-.pdf)
+
+### Device Model 架構
+
+- [ ] 理解 device model 三大結構（`bus_type`, `device_driver`, `device`）
+- [ ] Bus driver 的角色（以 USB 為例：adapter driver + device driver 配對）
+- [ ] Driver 開發三步驟：宣告裝置 → 註冊 hook → 向 bus core 註冊
+- [ ] `probe()` 與 `remove()` 函式的工作流程
+
+### Platform Devices 與 Device Tree
+
+- [ ] Platform bus 概念（非自動偵測裝置的處理方式）
+- [ ] Device Tree 結構（`.dts` vs `.dtsi`、`compatible` 屬性）
+- [ ] Pin multiplexing 概念
+- [ ] Device Tree bindings 查找方式
+
+### I2C Driver 範例
+
+- [ ] I2C driver 的 `probe()` / `remove()` 實作分析
+- [ ] 三種裝置配對方式（I2C name、DT compatible、ACPI ID）
+- [ ] Framework 結構與 bus 結構的互相引用模式
