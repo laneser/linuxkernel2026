@@ -34,11 +34,15 @@
 ```mermaid
 graph LR
     learner["🧑‍💻 學習者"]
-    dev["Dev Container (VM)<br/>- Claude CLI + Skills<br/>- uv + Python 3.12<br/>- 編輯、AI 討論、git 操作"]
+    dev["Dev Container (VM)<br/>- Claude CLI + Skills<br/>- uv + Python 3.12<br/>- gh CLI<br/>- 編輯、AI 討論、git 操作"]
     lab["實體 Linux 機器 (lab0)<br/>- gcc, make, valgrind, perf<br/>- 原生效能測試與分析<br/>- 無 GUI，僅 sshd"]
+    hackmd["HackMD<br/>- 作業報告發布<br/>- API 存取"]
+    github["GitHub<br/>- Fork 課程 repo<br/>- Push 作業程式碼"]
 
     learner <-- "VS Code" --> dev
     dev -- "SSH (rsync + 遠端命令)" --> lab
+    dev -- "gh CLI" --> github
+    dev -- "HackMD API<br/>(hackmd.py)" --> hackmd
 ```
 
 **Dev Container** 負責編輯、AI 輔助、版本控制；**實體機**負責編譯與原生效能測試。分離的原因是課程要求效能量測必須在原生 Linux 上進行，虛擬機的 overhead 會干擾結果。
@@ -64,12 +68,13 @@ graph TB
         refs["docs/references/*<br/>課程參考文件"]
         arc42["docs/ARC42.md<br/>架構文件"]
         claude_md["CLAUDE.md<br/>AI 行為指引"]
-        skills[".claude/skills/*<br/>Claude Skills"]
+        skills[".claude/skills/*<br/>Claude Skills<br/>(linux-source, hackmd, ...)"]
     end
 
     subgraph personal["個人檔案 (gitignored)"]
         progress[".learning-progress.md<br/>個人學習進度"]
         notes["notes/*<br/>個人學習筆記"]
+        homework["homework/*<br/>課程作業 repo"]
         settings[".claude/settings.local.json<br/>Claude 本地權限"]
     end
 
@@ -140,12 +145,15 @@ flowchart TD
 
 - **用途：** 程式碼編輯、Claude AI 對話、git 操作、文件撰寫
 - **基礎映像：** `mcr.microsoft.com/devcontainers/base:noble`
-- **工具：** VS Code, Claude CLI, uv + Python 3.12
+- **工具：** VS Code, Claude CLI, uv + Python 3.12, gh CLI
 - **SSH 連線：** 透過 bind mount host 的 `~/.ssh` 存取 SSH key
 
 devcontainer.json 設定：
 ```jsonc
 {
+    "features": {
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
     "mounts": [
         "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,readonly"
     ]
@@ -217,6 +225,7 @@ ssh lab0 'cd ~/lab0-c && perf stat ./qtest -f traces/trace-14-perf.cmd'
 |----------|------|------|
 | `.learning-progress.md` | 學習 checklist 打勾進度 | 從 `docs/learning-checklist.md` 產生 |
 | `notes/*` | 討論心得、技術分析、閱讀筆記 | 僅 `notes/README.md` 進 git |
+| `homework/*` | 課程作業 repository | 僅 `homework/README.md` 進 git，各作業有獨立 `.git/` |
 | `.claude/settings.local.json` | Claude CLI 本地權限 | 自動產生 |
 
 ### 術語一致性
@@ -264,6 +273,28 @@ ssh lab0 'cd ~/lab0-c && perf stat ./qtest -f traces/trace-14-perf.cmd'
   2. 討論告一段落，請 Claude 將重點寫入 `notes/`
   3. 需要撰寫 HackMD 報告時，從 notes 整理
 
+### ADR-005：課程作業存於 `homework/`（gitignored）
+
+- **決策：** 在專案內建立 `homework/` 目錄，存放 fork 的課程作業 repo，內容 gitignored（僅 `README.md` 進 git）
+- **原因：**
+  - 作業 repo 各自有獨立的 git 歷史，不應混入本學習專案的版控
+  - 放在專案內讓 Claude 可直接讀取作業程式碼，提供討論與輔助
+  - 模式與 `notes/` 一致（gitignored + README 說明）
+- **替代方案：**
+  - 作業 repo 放在專案外 — 可行但 Claude 存取不便，且工作目錄分散
+  - Git submodule — 過度複雜，fork 的 remote URL 因人而異
+
+### ADR-006：HackMD 整合採 CLI 腳本 + Claude Skill
+
+- **決策：** 以 Python stdlib-only 腳本（`hackmd.py`）封裝 HackMD API，搭配 Claude Skill 提供互動式指引
+- **原因：**
+  - 課程要求在 HackMD 撰寫作業報告，需要從開發環境直接發布
+  - stdlib only 避免額外依賴，`uv run` 即可執行
+  - Skill 負責流程引導（認證、工作流程建議），腳本負責 API 呼叫
+- **替代方案：**
+  - 使用 HackMD 官方 CLI — 截至 2026 年無官方 CLI 工具
+  - 手動在瀏覽器操作 — 無法從 Claude 對話中自動化
+
 ## 10. 品質需求
 
 <!-- TODO: 細化品質場景 -->
@@ -285,4 +316,8 @@ ssh lab0 'cd ~/lab0-c && perf stat ./qtest -f traces/trace-14-perf.cmd'
 | 通用模板 | `docs/learning-checklist.md`，定義所有學習項目的 Markdown checklist |
 | 個人進度 | `.learning-progress.md`，使用者的學習完成狀態（gitignored） |
 | 個人筆記 | `notes/`，使用者的學習心得與技術分析（gitignored） |
+| homework/ | 課程作業 repository 的工作區（gitignored），各作業有獨立 git 歷史 |
+| gh CLI | GitHub 官方命令列工具，用於 fork、clone、PR 等操作 |
+| HackMD | 線上協作 Markdown 編輯器，課程要求在此發布作業報告 |
+| hackmd.py | 專案自建的 HackMD API 客戶端（Python stdlib only） |
 | ADR | Architecture Decision Record，架構決策紀錄 |

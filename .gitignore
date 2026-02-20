@@ -7,3 +7,7 @@
 # Personal study notes (per-user, see notes/README.md)
 notes/*
 !notes/README.md
+
+# Homework working directories (per-user, see homework/README.md)
+homework/*
+!homework/README.md

@@ -56,6 +56,29 @@ Claude 可讀取個人進度，根據學習狀態建議下一步方向。模板�
 
 討論技術問題後，可請 Claude 將分析重點寫入 `notes/`。Claude 在後續 session 中可讀取這些筆記作為上下文。詳見 [`docs/ARC42.md`](docs/ARC42.md) ADR-004。
 
+## 作業工作流程
+
+課程作業的 fork → 開發 → 報告完整流程：
+
+1. **Fork & Clone** — 使用 `gh` CLI fork 課程 repo，clone 至 `homework/` 目錄
+2. **開發** — 在 `homework/<repo>/` 內編輯、commit、push
+3. **測試** — 透過 SSH 同步至實體機進行編譯與效能測試（待設定）
+4. **撰寫報告** — 在 `notes/` 撰寫草稿，完成後透過 HackMD skill 發布
+
+```bash
+# Fork + clone
+gh repo fork sysprog21/lab0-c --clone=false
+gh repo clone <username>/lab0-c homework/lab0-c
+
+# 發布報告至 HackMD
+uv run .claude/skills/hackmd/scripts/hackmd.py notes create \
+  --title "lab0-c 開發紀錄" --content "$(cat notes/lab0-report-draft.md)"
+```
+
+- **`homework/`** — 作業 repo 的工作區（gitignored，僅 `README.md` 進 git）
+- **`gh` CLI** — DevContainer 已預裝，用於 GitHub 操作（fork, clone, PR）
+- **HackMD skill** — 透過 API 管理 HackMD 筆記，詳見 `.claude/skills/hackmd/SKILL.md`
+
 ## 慣例
 
 - 文件語言以**繁體中文**為主

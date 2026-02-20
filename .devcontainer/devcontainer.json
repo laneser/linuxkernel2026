@@ -5,6 +5,10 @@
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/base:noble",
 
+	"features": {
+		"ghcr.io/devcontainers/features/github-cli:1": {}
+	},
+
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "curl -LsSf https://astral.sh/uv/install.sh | sh && export PATH=\"$HOME/.local/bin:$PATH\" && uv python install 3.12"
 }
