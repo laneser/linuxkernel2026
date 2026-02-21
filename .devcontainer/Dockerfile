@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     sudo \
     git \
     jq \
+    openssh-client \
+    rsync \
     # 課程開發工具（參照 linux2025-lab0.md Part A）
     build-essential \
     valgrind \
