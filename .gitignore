@@ -11,3 +11,4 @@ notes/*
 # Homework working directories (per-user, see homework/README.md)
 homework/*
 !homework/README.md
+!homework/kp_timsort/
