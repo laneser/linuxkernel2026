@@ -178,3 +178,4 @@ uv run .claude/skills/hackmd/scripts/hackmd.py notes create \
 | atomic | 不可再分的 | ~~原子操作~~ |
 | operator / operand | 運算子 / 運算元 | |
 | optimize | 視語境：改善、充分利用 | 勿濫用「最佳化」 |
+| kernel | 核心 | 僅用於 Linux kernel；其他語境避免使用「核心」以免混淆 |
