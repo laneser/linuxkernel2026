@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wamerican \
     aspell \
     colordiff \
+    graphviz \
     && rm -rf /var/lib/apt/lists/*
 
 # 建立 vscode 使用者（devcontainer 慣例）
