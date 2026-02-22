@@ -259,6 +259,23 @@ void klp_list_sort(void *priv, struct list_head *head, list_cmp_func_t cmp)
 	/* End of input; merge together all the pending lists. */
 	list = pending;
 	pending = pending->prev;
+	if (!pending) {
+		/*
+		 * Single run — input was already sorted (or a single
+		 * reversed run).  Just restore the doubly-linked list.
+		 */
+		struct list_head *tail = head;
+
+		while (list) {
+			tail->next = list;
+			list->prev = tail;
+			tail = list;
+			list = list->next;
+		}
+		tail->next = head;
+		head->prev = tail;
+		goto done;
+	}
 	for (;;) {
 		struct list_head *next = pending->prev;
 
@@ -269,7 +286,7 @@ void klp_list_sort(void *priv, struct list_head *head, list_cmp_func_t cmp)
 	}
 	/* The final merge, rebuilding prev links */
 	klp_merge_final(&wrapper, counting_cmp, head, pending, list);
-
+done:
 	/* Record instrumentation data */
 	kp_stats_record(n_elements, count, wrapper.comparisons,
 			n_asc_runs, n_desc_runs);

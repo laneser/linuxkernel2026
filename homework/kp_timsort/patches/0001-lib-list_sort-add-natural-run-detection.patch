@@ -1,0 +1,175 @@
+From 883ce60bf33d064a06203a1f7d4e560452353e12 Mon Sep 17 00:00:00 2001
+From: lane <lane@bridgewell.com>
+Date: Sun, 22 Feb 2026 15:47:40 +0000
+Subject: [PATCH] lib/list_sort: add natural run detection
+
+Replace the per-element insertion loop in list_sort() with natural run
+detection.  Instead of feeding one element at a time into the merge
+tree, scan for naturally ascending (cmp <= 0) or strictly descending
+(cmp > 0) runs and feed entire runs as units.
+
+Descending runs use strict inequality to preserve sort stability:
+equal elements remain in their original relative order after the run
+is reversed in place.
+
+The merge scheduling logic (the bit-counting scheme that ensures at
+worst 2:1 balanced merges) is preserved unchanged; only the "unit"
+pushed onto the pending stack grows from a single element to an entire
+natural run.
+
+For random input most runs are length 1 and this degenerates to the
+original algorithm with identical comparison count.  For partially
+sorted input, longer runs reduce the number of merge passes, achieving
+O(n log r) comparisons where r is the number of natural runs.
+
+When the input is already sorted (or a single reversed run), a fast
+path rebuilds the doubly-linked list structure directly without any
+merge overhead.
+---
+ lib/list_sort.c | 100 +++++++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 78 insertions(+), 22 deletions(-)
+
+diff --git a/lib/list_sort.c b/lib/list_sort.c
+index a310ecb..57b5002 100644
+--- a/lib/list_sort.c
++++ b/lib/list_sort.c
+@@ -184,12 +184,20 @@ static void merge_final(void *priv, list_cmp_func_t cmp, struct list_head *head,
+  * 5 above, you can see that the number of elements we merge with a list
+  * of size 2^k varies from 2^(k-1) (cases 3 and 5 when x == 0) to
+  * 2^(k+1) - 1 (second merge of case 5 when x == 2^(k-1) - 1).
++ *
++ * With natural run detection, each "unit" pushed onto the pending stack
++ * is a maximal ascending run instead of a single element.  The merge
++ * scheduling is the same bit-counting scheme, but "count" now tracks
++ * the number of runs rather than individual elements.  For random input,
++ * most runs are length 1 and this degenerates to the original algorithm.
++ * For partially sorted input, longer runs reduce merge passes, achieving
++ * O(n log r) comparisons where r is the number of natural runs.
+  */
+ __attribute__((nonnull(2,3)))
+ void list_sort(void *priv, struct list_head *head, list_cmp_func_t cmp)
+ {
+ 	struct list_head *list = head->next, *pending = NULL;
+-	size_t count = 0;	/* Count of pending */
++	size_t count = 0;	/* Number of runs in pending */
+ 
+ 	if (list == head->prev)	/* Zero or one elements */
+ 		return;
+@@ -197,27 +205,12 @@ void list_sort(void *priv, struct list_head *head, list_cmp_func_t cmp)
+ 	/* Convert to a null-terminated singly-linked list. */
+ 	head->prev->next = NULL;
+ 
+-	/*
+-	 * Data structure invariants:
+-	 * - All lists are singly linked and null-terminated; prev
+-	 *   pointers are not maintained.
+-	 * - pending is a prev-linked "list of lists" of sorted
+-	 *   sublists awaiting further merging.
+-	 * - Each of the sorted sublists is power-of-two in size.
+-	 * - Sublists are sorted by size and age, smallest & newest at front.
+-	 * - There are zero to two sublists of each size.
+-	 * - A pair of pending sublists are merged as soon as the number
+-	 *   of following pending elements equals their size (i.e.
+-	 *   each time count reaches an odd multiple of that size).
+-	 *   That ensures each later final merge will be at worst 2:1.
+-	 * - Each round consists of:
+-	 *   - Merging the two sublists selected by the highest bit
+-	 *     which flips when count is incremented, and
+-	 *   - Adding an element from the input as a size-1 sublist.
+-	 */
+ 	do {
+ 		size_t bits;
+ 		struct list_head **tail = &pending;
++		struct list_head *run_tail;
++		struct list_head *next_list;
++		int descending;
+ 
+ 		/* Find the least-significant clear bit in count */
+ 		for (bits = count; bits & 1; bits >>= 1)
+@@ -232,17 +225,80 @@ void list_sort(void *priv, struct list_head *head, list_cmp_func_t cmp)
+ 			*tail = a;
+ 		}
+ 
+-		/* Move one element from input list to pending */
++		/*
++		 * Natural run detection: scan for a maximal monotonic
++		 * run from the input.  We detect both ascending (cmp <= 0)
++		 * and strictly descending (cmp > 0) runs.
++		 *
++		 * Descending uses strict inequality (> 0, not >= 0) to
++		 * preserve sort stability: equal elements stay in their
++		 * original order even after the run is reversed.
++		 */
++		run_tail = list;
++		descending = run_tail->next &&
++			     cmp(priv, run_tail, run_tail->next) > 0;
++		if (descending) {
++			/* Strictly descending run */
++			while (run_tail->next &&
++			       cmp(priv, run_tail, run_tail->next) > 0)
++				run_tail = run_tail->next;
++		} else {
++			/* Ascending run (includes single elements) */
++			while (run_tail->next &&
++			       cmp(priv, run_tail, run_tail->next) <= 0)
++				run_tail = run_tail->next;
++		}
++
++		/* Snip the run from the remaining input */
++		next_list = run_tail->next;
++		run_tail->next = NULL;
++
++		if (descending) {
++			/*
++			 * Reverse the descending singly-linked run in-place
++			 * so it becomes ascending.  After reversal, 'prev'
++			 * is the new head and the original 'list' is the
++			 * tail.
++			 */
++			struct list_head *prev = NULL, *curr = list, *tmp;
++
++			while (curr) {
++				tmp = curr->next;
++				curr->next = prev;
++				prev = curr;
++				curr = tmp;
++			}
++			list = prev;	/* reversed list head */
++		}
++
++		/* Push this run onto the pending stack */
+ 		list->prev = pending;
+ 		pending = list;
+-		list = list->next;
+-		pending->next = NULL;
++		list = next_list;
+ 		count++;
+ 	} while (list);
+ 
+ 	/* End of input; merge together all the pending lists. */
+ 	list = pending;
+ 	pending = pending->prev;
++	if (!pending) {
++		/*
++		 * Single run: the input was already sorted (or a single
++		 * descending run that was reversed).  Rebuild the
++		 * doubly-linked list structure directly.
++		 */
++		struct list_head *tail = head;
++
++		while (list) {
++			tail->next = list;
++			list->prev = tail;
++			tail = list;
++			list = list->next;
++		}
++		tail->next = head;
++		head->prev = tail;
++		return;
++	}
+ 	for (;;) {
+ 		struct list_head *next = pending->prev;
+ 
+-- 
+2.43.0
+

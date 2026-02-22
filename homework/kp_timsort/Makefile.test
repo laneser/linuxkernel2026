@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: GPL-2.0
+# Build test_list_sort module for RPi (cross-compile)
+
+obj-m := test_list_sort.o
+
+KDIR ?= /tmp/rpi-kernel/linux-source-6.12
+ARCH ?= arm64
+CROSS_COMPILE ?= aarch64-linux-gnu-
+
+all:
+	$(MAKE) -C $(KDIR) M=$(PWD) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) modules
+
+clean:
+	$(MAKE) -C $(KDIR) M=$(PWD) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) clean
