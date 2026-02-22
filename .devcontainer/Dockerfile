@@ -18,6 +18,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     aspell \
     colordiff \
     graphviz \
+    # FreeSans font for Linux Kernel Map SVG rendering
+    fonts-freefont-ttf \
     && rm -rf /var/lib/apt/lists/*
 
 # 建立 vscode 使用者（devcontainer 慣例）
