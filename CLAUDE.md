@@ -26,7 +26,8 @@
 
 | 來源狀況 | 本地存放 | Claude 行為 |
 |----------|---------|------------|
-| **結構良好**（有清晰標題分段的 HackMD 等） | 摘要 + metadata | 需要細節時從原始出處 `WebFetch` 抓取 |
+| **課程教材**（`hackmd.io/@sysprog/` 開頭） | **完整 raw markdown** | 用 `curl` 抓 `/download` 端點，直接讀取本地檔案（見下方說明） |
+| **其他結構良好的來源** | 摘要 + metadata | 需要細節時從原始出處 `WebFetch` 抓取 |
 | **結構不佳**（PDF、無分段長頁面等） | 本地存完整整理版 | 直接讀取本地檔案 |
 
 每個參考檔案的 header 包含以下 metadata：
@@ -39,10 +40,20 @@
 > **省略內容：** 被省略的主要段落（僅摘要版填寫）
 ```
 
+#### 課程教材抓取方式
+
+老師的教材（`hackmd.io/@sysprog/` 開頭的 URL）**必須用 `curl` 抓 raw markdown**，不可用 `WebFetch`：
+
+```bash
+curl -sL "https://hackmd.io/@sysprog/{note-id}/download" -o docs/references/{filename}.md
+```
+
+**原因：** `WebFetch` 內部使用較小的模型處理內容，最終只會產出摘要，無法保留教材的完整細節（程式碼、數學式、延伸問題等）。抓取 raw markdown 後由 Claude 主模型直接分析，才能達到足夠的理解深度。
+
 Claude 處理參考文件時的行為：
-1. 先讀本地摘要，判斷是否足以回答問題
+1. 先讀本地檔案，判斷是否足以回答問題
 2. 若不足，檢查「涵蓋度」和「省略內容」確認缺少的部分
-3. 從「原始出處」URL 抓取所需段落（不需全抓）
+3. 若為課程教材，用 `curl` 抓取 raw markdown；其他來源才用 `WebFetch`
 
 ### 課程文件更新
 
