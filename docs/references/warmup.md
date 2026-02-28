@@ -1,8 +1,7 @@
 > **原始出處：** https://hackmd.io/@sysprog/linux2026-warmup
-> **擷取日期：** 2026-02-26
-> **用途：** 2026q1 第 1 週作業 (warm-up)
+> **擷取日期：** 2026-02-27
+> **用途：** 第一週作業 (warmup) 完整要求
 > **涵蓋度：** 完整
-> **省略內容：** 無
 
 ---
 title: 2026 年 Linux 核心設計課程作業 —— warmup
@@ -11,19 +10,16 @@ description: 做好探索 Linux 核心的準備
 tags: linux2026
 ---
 
-# warm-up
+# 2026 年 [Linux 核心設計](https://wiki.csie.ncku.edu.tw/linux/schedule)課程作業: warmup
 
 > 主講人: [jserv](https://wiki.csie.ncku.edu.tw/User/jserv) / 課程討論區: [2026 年系統軟體課程](https://www.facebook.com/groups/system.software2026/)
 :mega: 返回「[Linux 核心設計](https://wiki.csie.ncku.edu.tw/linux/schedule)」課程進度表
 
-:::info
-* 請在 2 月 28 日 13:00 重新整理本頁面，會有提交作業的相關描述
-* 繳交期限: 3 月 11 日
-:::
+==[解說錄影](https://youtu.be/7PDirLNEZHA)==
 
 ## :memo: 預期目標
 * 理解實數到離散數值系統的權衡，以及 Linux 核心作為資訊科技的縮影，如何引入工程手法來解決問題
-* 充分檢視第一週教材
+* 充分檢視[第一週教材](https://wiki.csie.ncku.edu.tw/linux/schedule)
 * 誠實面對自己：缺什麼就補什麼
 
 ## :rocket: 檢查清單
@@ -31,26 +27,31 @@ tags: linux2026
 * 做好前 6 週每週投入 16 小時的準備並落實
 * 認清「[寫作業才是主體](https://docs.google.com/presentation/d/1LIP64FQRa9J34ks9rKPmXmNQ-ZhL91qfB9KkF2nr30g/edit?usp=sharing)」的教學方式
 * 充分閱讀教材、紀錄認知和提問，並回覆給定的延伸問題
+* [Git 教學和 GitHub 設定指引](https://hackmd.io/@sysprog/git-with-github) ^附教學影片^，準備 GitHub 帳號 (不該隨意更名，否則會影響評分)，本學期所有的作業和成果檢視都會以 GitHub 作為識別
 
 ## 筆記書寫規範
+* 本課程要求學員將所有作業公開，目的是建立可相互檢視與交流的學習環境。透過彼此閱讀與回饋，學員不僅能深化對專業議題的理解，也能在反覆修正中強化對細節的掌握。後續授課教師亦將邀請資訊科技領域的從業人員觀摩學員作業並提出建議，書寫規範與表達品質不僅關乎形式，更體現專業態度與協作能力，是自我精進與共同成長的基礎
+* AI 工具的角色在於輔助。可運用於撰寫測試程式碼、整理參考資料與蒐集背景資訊，但關鍵的推測、查證、分析與討論，仍應由學員自行完成。所有思考歷程與決策依據，皆須如實反映在 HackMD 筆記與 GitHub repository 的版本演進之中，使授課教師與其他學員能夠追溯脈絡、進行稽核與交叉檢視。唯有保留完整的演變過程，才讓協作建立在可驗證的基礎之上
 * 共筆書寫請考慮到日後協作，避免過多的個人色彩，用詞儘量中性
-* 不要在筆記內加入 `[TOC]` : 筆記左上方已有 Table of Contents (TOC) 功能，不需要畫蛇添足
+* 不要在筆記內加入 `[TOC]` : HackMD 網頁在展現筆記時，左上方已有 Table of Contents (TOC) 功能，不需要畫蛇添足
 * 不要變更預設的 CSS 也不要加入任何佈景主題: 這是「開發紀錄」，主要作為是評分和接受同儕的檢閱，不是彰顯「個人風格」的地方
-* 當[在筆記中貼入程式碼](https://hackmd.io/c/tutorials-tw/%2Fs%2Fhow-to-use-code-blocks-tw)時，避免非必要的行號，也就是該手動將 `c=` 或 `cpp=` 變更為 `c` 或 `cpp`。行號只在後續討論明確需要行號時，才要出現，否則維持精簡的展現。可留意「[你所不知道的 C 語言: linked list 和非連續記憶體](https://hackmd.io/@sysprog/c-linked-list)」裡頭程式碼展現的方式
+* 當[在筆記中貼入程式碼](https://hackmd.io/c/tutorials-tw/%2Fs%2Fhow-to-use-code-blocks-tw)時，避免非必要的行號，也就是該手動將 `c=` 或 `cpp=` 變更為 `c` 或 `cpp`。行號只在後續討論明確需要行號時，才要出現，否則維持精簡的展現。可留意〈[你所不知道的 C 語言: linked list 和非連續記憶體](https://hackmd.io/@sysprog/c-linked-list)〉裡頭程式碼展現的方式
 * HackMD 不是讓你張貼完整程式碼的地方，GitHub 才是！因此你在開發紀錄只該列出關鍵程式碼 (善用 `diff` 標示)，可附上對應 GitHub commit 的超連結，列出程式碼是為了「檢討」和「便於他人參與討論」，不是用來「假裝自己有付出」
     * 單頁 HackMD 筆記會有內容長度的限制，這也是為何作業規範強調要記錄你的洞見和關鍵程式碼，完整的程式碼該在 GitHub 儲存庫或 [gist](https://gist.github.com/) 出現。
 * 留意科技詞彙的使用，請參見「[資訊科技詞彙翻譯](https://hackmd.io/@sysprog/it-vocabulary)」及「[詞彙對照表](https://hackmd.io/@l10n-tw/glossaries)」
-* 避免過多的中英文混用，已有明確翻譯詞彙者，例如「鏈結串列」(linked list) 和「佇列」(queue)，就使用該中文詞彙，英文則留給變數名稱、人名，或者缺乏通用翻譯詞彙的場景。
+* 避免過多的中英文混用，已有明確翻譯詞彙者，例如「鏈結串列」(linked list) 和「佇列」(queue)，就使用該中文詞彙，英文則留給變數名稱、人名，或者缺乏通用翻譯詞彙的場景
 * 不要濫用 `:::info`, `:::success`, `:::warning` 等標示，儘量用清晰的文字書寫。`:::danger` 則僅限授課教師作為批注使用
-* 在中文敘述中，使用全形標點符號，例如該用「，」，而非 ","。注意書名號的使用，即 `〈` 和 `〉`，非「小於」和「大於」符號。
+* 在中文敘述中，使用全形標點符號，例如該用「，」，而非 ","。注意書名號的使用，即 `〈` 和 `〉`，非「小於」和「大於」符號
 * 避免使用不必要的 [emoji 字元](https://en.wikipedia.org/wiki/List_of_emojis)
 * 撰寫的過程中，可善用 ChatGPT 一類的工具，但需要明確標示並指出裡頭謬誤和不精確之處。搭配 [ChatGPT cheatsheet](https://quickref.me/chatgpt)
     * 台大電機系李宏毅教授對於 ChatGPT 的看法是，要善用人工智慧的成果，一旦人們得以善用，人類的書寫不該比 GPT 一類的大語言模型差。
+* 無論標題和內文中，**中文和英文字元之間要有空白字元** (對排版和文字搜尋有利)，參見〈[中文文案排版指北](https://github.com/sparanoid/chinese-copywriting-guidelines)〉
+* 文字訊息 (尤其是程式執行結果) 避免用圖片來表示，否則不好搜尋和分類
 * 可使用 ChatGPT 一類的人工智慧工具，但不得由 ChatGPT 產生整篇報告並直接張貼在 HackMD，相反地，你應該依據子主題書寫，並斟酌運用 ChatGPT 一類的人工智慧工具潤飾你的書寫內容，這些都該在 HackMD 的變更紀錄中可見 $\to$ 本課程不接受沒有完整編修紀錄的筆記，學員應當漸進更新並回應授課教師和學員的指教
 
 
 ## 探討〈[資訊科技詞彙翻譯](https://hackmd.io/@sysprog/it-vocabulary)〉
-* "render" 在電腦圖學語境中為何應強調「如實呈現」？「渲染」一詞喪失什麼關鍵意涵？在 Linux 核心原始程式碼中，"render" 出現在哪些場景、語境又有哪些？
+* "render" 在電腦圖學語境中為何應強調「如實呈現」？「渲染」一詞喪失什麼關鍵意涵？在 Linux 核心原始程式碼中，"render" 出現在哪些場景、語境又有哪些？翻閱詞典 (善用學校圖書館) 並考據詞源
 * 說明 constant 與 immutable 的差異，並探討程式設計中的關鍵考量
 * 比較 concurrent 與 parallel 的語意差異，並說明為何「並行」較貼近 concurrent 的本意
 * 當我們撰寫 Linux 核心文件，應如何區分 process, thread, task, job 等術語，才能避免跨領域誤解又省去過多的中英並陳？
@@ -161,6 +162,7 @@ tags: linux2026
     * 說明為何延遲合併可降低比較次數
     * 建立數學上界
 * 鏈結串列的新增節點的時間複雜度是 O(1)，而陣列 (array) 則是 O(n)，但在實際硬體上，陣列可能更快，解釋為何如此並充分量化分析
+* 逐一分析[第一週教材列出](https://wiki.csie.ncku.edu.tw/linux/schedule)的**題目 1** 到**題目 7**，確認理解題目且充分作答，並指出參考題解的錯誤和待改進之處
 
 ## 細讀〈[Linux: 作業系統術語及概念](https://hackmd.io/@sysprog/linux-concepts)〉
 * 若若一個惡意應用程式成功觸發多次系統呼叫並頻繁進入核心態，是否等同於繞過 user/kernel 隔離？分析：
@@ -220,4 +222,21 @@ tags: linux2026
     3. 明確說明適用範圍與失效條件
 
 ## 誠實面對[期初考題](https://hackmd.io/@sysprog/linux2026-quiz1)
-> 進行所有延伸問題
+> 完整回覆所有延伸問題
+
+## :penguin: 作業要求
+* 研讀[第一週教材](https://wiki.csie.ncku.edu.tw/linux/schedule)的「所有」內容，紀錄你的發現和提問，並且針對上方的要點和對應到教材的提問，完整回覆，要以教材和 C 語言規格書、Linux 核心原始程式碼其及 git log、分科課程的教科書為主要參照，左以你的觀察、實驗、推測
+    * 參照〈[提問的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way)〉，清楚描述你的疑惑，必須明確標注脈絡 (context) 和你做了哪些分析和實驗，附上相關的公開素材
+    * 針對個別教材，在筆記建立 [Heading level 2](https://www.markdownguide.org/basic-syntax/) (即 `##`) 並羅列教材標題，隨後闡述問題和你的回覆，避免過多的縮排層級 (level)，使用 **`- [ ]`** 標注問題 $\to$ [示範用的筆記](https://hackmd.io/@sysprog/sample-linux-notte)
+    * 過程中，你可能會遇到問題，請善用[課程討論區](https://www.facebook.com/groups/system.software2026)
+* [HackMD](https://hackmd.io/) 筆記作為開發紀錄，必須嚴格依循上方的「筆記書寫規範」，且符合如下:
+	* 標題格式固定為 ==2026q1 Homework1 (warmup)==，其中 "warmup" 是小寫，**2026q1** 表示「2026 年第 1 季」
+	* 共筆內容的第二行則為 **contributed by < `你的GitHub帳號名稱` >**，務必確保你的 GitHub 帳號是有效的
+	* 共筆內容的第三行僅留換行符號，第四行是 ==`{%hackmd NrmQUGbRQWemgwPfhzXj6g %}`== 並確保「作業書寫規範」正確顯示
+* 填寫 [Google 表單](https://forms.gle/67BSrJqt5RuEDQg79)，填入個人資訊和你建立的 HackMD 筆記的超連結，並回答指定問題。一旦系統確認你的提交內容，你的作業預期會出現「[作業區](https://hackmd.io/@sysprog/linux2026-homework1)」
+    > :warning: 不用等到作業完成才填寫表單，當你開始進行作業時，即可填寫表單，系統會進行必要的檢查工作。某些問題的回答較費時，務必及早開始
+* 本課程鼓勵學員相互觀摩，從而進行良性互動及批評，但要注意以下:
+    * 當你參照其他學員作業的材料時，應該指明出處並加上對應的超連結
+    * 善用 HackMD 的留言功能，在其他學員的筆記內文，留下你的想法、指出錯誤，和提及你對此的改進等等
+* 截止日期：
+    * Mar 11, 2026 25:59 (含) 之前

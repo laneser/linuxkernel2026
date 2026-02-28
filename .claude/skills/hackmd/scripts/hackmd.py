@@ -174,6 +174,7 @@ def cmd_notes_create(args: argparse.Namespace) -> None:
     url = note.get("publishLink", f"https://hackmd.io/{nid}")
     print(f"Created note: {nid}")
     print(f"URL: {url}")
+    print("Tip: set permalink manually at the note's sharing settings.")
 
 
 def cmd_notes_update(args: argparse.Namespace) -> None:
@@ -186,6 +187,16 @@ def cmd_notes_update(args: argparse.Namespace) -> None:
         else:
             print("Error: provide --content or pipe content via stdin", file=sys.stderr)
             sys.exit(1)
+
+    # Back up current remote content before overwriting.
+    note = _api("GET", f"/notes/{args.id}", token=token)
+    old_content = note.get("content", "") if isinstance(note, dict) else ""
+    if old_content:
+        from datetime import datetime
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup = Path(f"/tmp/hackmd_backup_{args.id}_{ts}.md")
+        backup.write_text(old_content)
+        print(f"Backup: {backup}")
 
     _api("PATCH", f"/notes/{args.id}", token=token, data={"content": content})
     print(f"Updated note: {args.id}")

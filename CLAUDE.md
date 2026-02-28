@@ -40,6 +40,33 @@
 > **省略內容：** 被省略的主要段落（僅摘要版填寫）
 ```
 
+#### 參考文件索引
+
+| 檔案 | 用途 |
+|------|------|
+| `n1256-c99.md` | ISO/IEC 9899:TC3 (C99) 規格書完整 markdown 轉換 |
+| `it-vocabulary.md` | 資訊科技詞彙翻譯 |
+| `warmup.md` | 第一週作業 (warmup) 完整要求 |
+| `ai-guidelines.md` | 本課程 AI 工具使用規範 |
+| `linux-course-schedule.md` | Linux 核心設計 (Spring 2026) 課程進度表 |
+| `quiz1.md` | 2026q1 第 1 週測驗題 |
+| `c-pointer.md` | 你所不知道的 C 語言：指標篇 |
+| `c-linked-list.md` | linked list 和非連續記憶體 |
+| `binary-representation.md` | 解讀計算機編碼（二補數、群論、資安） |
+| `gnu-linux-dev.md` | 課程開發工具參考 |
+| `linux-concepts.md` | Linux 作業系統術語及概念 |
+| `from-entropy-to-os.md` | 從熱力學第二定律到系統軟體 |
+| `git-with-github.md` | 課程 Git 工作流程參考 |
+| `git-commit-message.md` | commit message 規範參考 |
+| `floating-point.md` | 留意浮點數運算的陷阱 |
+| `floating-point-intro.md` | 初步解讀浮點數 |
+| `linux-interrupt.md` | 中斷處理機制 |
+| `linux-kernel-module.md` | Linux kernel module 深入機制分析 |
+| `linux-perf.md` | 運用 Perf 分析程式效能並改善 |
+| `lkmpg.md` | Linux Kernel Module Programming Guide |
+
+**維護要求：** 新增、刪除或重新命名 `docs/references/` 中的檔案時，必須同步更新上方索引表。索引不同步會導致 Claude 找不到已有的參考資料或引用已刪除的檔案。
+
 #### 課程教材抓取方式
 
 老師的教材（`hackmd.io/@sysprog/` 開頭的 URL）**必須用 `curl` 抓 raw markdown**，不可用 `WebFetch`：
@@ -119,23 +146,28 @@ Notes 的核心價值不僅是技術結論，更是**學習者如何與 AI 協�
 
 HackMD 報告是公開發表的學習成果，具備教育意義，應讓其他學習者能從中學到東西。
 
+**書寫規範（強制）：** 所有發布至 HackMD 的內容，**必須嚴格遵守**課程書寫規範（見 `.claude/skills/hackmd/references/writing-conventions.md`）。撰寫前必須讀取該規範並逐條檢查。
+
+**個人寫作風格：禁用** — 書寫規範明確要求「避免過多的個人色彩，用詞儘量中性」。因此撰寫 HackMD 內容時，**不得參考 `notes/writing_style.md`**，不得模仿個人書寫語氣。用詞應中性、客觀、專業。
+
 **角色分工：**
 - **學習者** — 思路核心、方向決策者、最終審核者
-- **Claude** — 主筆（因寫作能力較強），但服務於學習者的思路
+- **Claude** — 主筆，但服務於學習者的思路，且嚴格遵守書寫規範
 
 **撰寫原則：**
-1. **以學習者的思路為核心** — 報告的主線是「我怎麼想、我怎麼做、我學到什麼」，而非 Claude 的分析報告
-2. **使用學習者的寫作風格** — 參考 `notes/writing_style.md`，模仿用詞習慣、語氣、句式結構，讓文章讀起來像是使用者本人寫的
-3. **展現探索過程** — 不只寫最終結果，也寫走過的彎路、嘗試過的失敗方案、為什麼改變方向
-4. **教育價值優先** — 讀者應能從報告中學到：技術知識 + 問題解決思路 + AI 協作方法
+1. **每句話都要有憑據** — 不得「想當然爾」。每個技術主張都必須附上出處（原始碼檔案與行號、規格書章節、實驗輸出等）。無法提供憑據的內容不得寫入報告。撰寫前應先透過 Grep/Read 或實驗驗證，確認事實正確後才落筆。
+2. **以學習者的思路為核心** — 報告的主線是「我怎麼想、我怎麼做、我學到什麼」，而非 Claude 的分析報告
+3. **用詞中性客觀** — 遵守書寫規範，不帶入個人色彩或語氣風格
+4. **展現探索過程** — 不只寫最終結果，也寫走過的彎路、嘗試過的失敗方案、為什麼改變方向
+5. **教育價值優先** — 讀者應能從報告中學到：技術知識 + 問題解決思路 + AI 協作方法
+6. **只列關鍵程式碼** — 完整程式碼放 GitHub，HackMD 只放關鍵片段和 diff
 
 **工作流程：**
 1. Claude 從 `notes/` 中的互動紀錄整理出報告草稿
-2. 草稿以學習者第一人稱撰寫，用學習者的風格
-3. 學習者審核草稿，可直接在 HackMD 上修改或要求 Claude 修正
-4. 最終版本由學習者確認後發布
-
-**寫作風格參考：** [`notes/writing_style.md`](notes/writing_style.md)（由 Claude 觀察互動後逐步建立）
+2. 草稿以學習者第一人稱撰寫，用詞中性客觀
+3. **發布前檢查** — 逐條對照書寫規範，確認無違規內容
+4. 學習者審核草稿，可直接在 HackMD 上修改或要求 Claude 修正
+5. 最終版本由學習者確認後發布
 
 ## 作業工作流程
 
