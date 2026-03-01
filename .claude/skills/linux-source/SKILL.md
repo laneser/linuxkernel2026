@@ -5,33 +5,63 @@ description: "Manage a local Linux kernel source tree at /tmp/linux for code ref
 
 # Linux Kernel Source Reference
 
-Maintain a shallow clone of the latest stable Linux kernel at `/tmp/linux`
-for source code lookup during learning.
+Maintain a shallow clone of the latest **stable release** (no RC) of the Linux kernel
+at `/tmp/linux` for source code lookup during learning.
 
 ## Step 1: Ensure source is available
 
-Check if `/tmp/linux` exists and is a valid git repo:
+Check if `/tmp/linux` exists and is a valid git repo, and verify it's on a stable tag:
 
 ```bash
 test -d /tmp/linux/.git && echo "EXISTS" || echo "MISSING"
 ```
 
-**If MISSING** — clone (takes ~2 minutes):
+**If MISSING** — clone and checkout latest stable tag:
 ```bash
 git clone --depth 1 -b master \
   https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git \
   /tmp/linux
+
+# Find and checkout latest stable tag (exclude RC versions)
+LATEST_TAG=$(git -C /tmp/linux ls-remote --tags origin 'refs/tags/v*' \
+  | grep -v '\-rc' | grep -v '\^{}' \
+  | sed 's|.*refs/tags/||' \
+  | sort -V | tail -1)
+git -C /tmp/linux fetch --depth 1 origin tag "$LATEST_TAG"
+git -C /tmp/linux checkout "$LATEST_TAG"
+echo "Checked out: $LATEST_TAG"
 ```
 
-**If EXISTS** — optionally update (only if user asks or source is stale):
+**If EXISTS** — verify it's on a stable tag, update if needed:
 ```bash
-git -C /tmp/linux fetch --depth 1 origin master && \
-git -C /tmp/linux reset --hard origin/master
+# Check current tag
+CURRENT=$(git -C /tmp/linux describe --tags --exact-match 2>/dev/null || echo "no tag")
+echo "Current: $CURRENT"
+
+# To update to latest stable:
+LATEST_TAG=$(git -C /tmp/linux ls-remote --tags origin 'refs/tags/v*' \
+  | grep -v '\-rc' | grep -v '\^{}' \
+  | sed 's|.*refs/tags/||' \
+  | sort -V | tail -1)
+if [ "$CURRENT" != "$LATEST_TAG" ]; then
+  git -C /tmp/linux fetch --depth 1 origin tag "$LATEST_TAG"
+  git -C /tmp/linux checkout "$LATEST_TAG"
+  echo "Updated to: $LATEST_TAG"
+else
+  echo "Already on latest stable: $LATEST_TAG"
+fi
 ```
 
 Show the current kernel version after clone/update:
 ```bash
 head -5 /tmp/linux/Makefile
+```
+
+**IMPORTANT:** The tag version determines the GitHub link base URL. Store the tag
+for use in source code references:
+```bash
+KERNEL_TAG=$(git -C /tmp/linux describe --tags --exact-match)
+echo "GitHub base: https://github.com/torvalds/linux/blob/$KERNEL_TAG/"
 ```
 
 ## Step 2: Search and browse
@@ -72,5 +102,7 @@ Use the standard tools to search the kernel source:
 - `/tmp/linux` is ephemeral (not persisted across container rebuilds) — re-clone when needed
 - Use `--depth 1` to keep disk usage minimal (~2 GB vs ~5 GB full history)
 - Do NOT modify the kernel source — it's read-only reference
-- When quoting kernel code, include the file path and mention the kernel version
+- **Always checkout a stable tag** (e.g., `v6.19`), never stay on `master` — master changes frequently and line numbers will drift from the tag used in GitHub links
+- When quoting kernel code, include the file path, **line number**, and **GitHub link with version tag** (e.g., `https://github.com/torvalds/linux/blob/v6.19/kernel/fork.c#L2291`)
+- **Verify line numbers match the checked-out tag** — if the local source is on a different commit than the linked tag, line numbers will be wrong
 - For large files, read specific line ranges rather than the entire file

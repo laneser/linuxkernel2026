@@ -20,7 +20,8 @@ Read .claude/skills/hackmd/references/writing-conventions.md
 1. **用詞中性** — 避免個人色彩，**禁止參考 `notes/writing_style.md` 模仿個人語氣**
 2. **不加 `[TOC]`**
 3. **不變更 CSS / 佈景主題**
-4. **程式碼區塊不加行號** — 用 `c` 而非 `c=`
+4. **數學公式一律用 LaTeX** — `$...$` 行內、`$$...$$` 獨立；C 運算子須跳脫（`\%`、`\mathbin{\&}`）
+5. **程式碼區塊不加行號** — 用 `c` 而非 `c=`
 5. **只列關鍵程式碼** — 善用 `diff` 標示，完整程式碼放 GitHub
 6. **不濫用 `:::info` / `:::success` / `:::warning`** — `:::danger` 僅限老師
 7. **中文用全形標點** — 「，」而非 ","
