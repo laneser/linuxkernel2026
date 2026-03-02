@@ -18,6 +18,7 @@ Configuration:
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import os
 import stat
@@ -66,6 +67,9 @@ def _api(method: str, path: str, *, token: str, data: dict | None = None) -> dic
     req.add_header("Authorization", f"Bearer {token}")
     if body is not None:
         req.add_header("Content-Type", "application/json")
+        if len(body) > 50_000:
+            req.data = gzip.compress(body)
+            req.add_header("Content-Encoding", "gzip")
 
     try:
         with urllib.request.urlopen(req) as resp:
