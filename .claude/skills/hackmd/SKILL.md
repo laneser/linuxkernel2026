@@ -107,6 +107,17 @@ uv run .claude/skills/hackmd/scripts/hackmd.py notes update <note-id> \
   --content "$(cat notes/lab0-report-draft.md)"
 ```
 
+## API 限制：大型筆記無法透過 API 更新
+
+HackMD API（`PATCH /notes/{noteId}`）只支援 `content` 全文替換，不支援 diff/partial update，也不支援 gzip 壓縮。Content-Type 限定 `application/json`。
+
+中文內容在 UTF-8 編碼下每字元佔 3 bytes，加上 JSON 轉義（`\n`、`\"`、`\\`），實際 HTTP payload 約為字元數的 2.4 倍。實測伺服器的 HTTP body 限制約 **100KB**，對應約 **42,000 字元**的中文 markdown。
+
+**當更新失敗（HTTP 500）時：**
+1. 告知使用者筆記已超過 API 上傳限制
+2. 提醒使用者從本地 `notes/` 手動複製貼上至 HackMD 網頁編輯器
+3. **本地 `notes/` 檔案始終是內容的主要編輯對象**，HackMD 是發布管道
+
 ## Guidelines
 
 - 發布前提醒使用者檢查 AI 使用揭露（見 `docs/references/ai-guidelines.md`）
