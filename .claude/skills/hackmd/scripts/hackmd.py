@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""HackMD CLI — minimal client using stdlib only.
+"""HackMD CLI — read-only client using stdlib only.
 
 Usage:
     hackmd.py auth login          Prompt for API token, verify, and save
     hackmd.py auth status         Show current authentication status
     hackmd.py notes list          List your notes
     hackmd.py notes get <id>      Print note content (Markdown)
-    hackmd.py notes create        Create a new note (--title, --content or stdin)
-    hackmd.py notes update <id>   Update note content (--content or stdin)
-    hackmd.py notes delete <id>   Delete a note (requires --yes)
+
+Note: create/update/delete removed due to HackMD API 100KB payload limit.
+Use GitHub Sync instead: edit locally, commit+push to GitHub, then pull
+from GitHub in HackMD (Versions and GitHub Sync → Pull from GitHub).
 
 Configuration:
     Token is stored at ~/.config/hackmd/token (mode 0600).
@@ -18,7 +19,6 @@ Configuration:
 from __future__ import annotations
 
 import argparse
-import gzip
 import json
 import os
 import stat
@@ -156,65 +156,29 @@ def cmd_notes_get(args: argparse.Namespace) -> None:
     print(content)
 
 
-def cmd_notes_create(args: argparse.Namespace) -> None:
-    """Create a new note."""
-    token = _require_token()
-    content = args.content
-    if content is None:
-        if not sys.stdin.isatty():
-            content = sys.stdin.read()
-        else:
-            print("Error: provide --content or pipe content via stdin", file=sys.stderr)
-            sys.exit(1)
+_GITHUB_SYNC_MSG = """\
+create/update/delete are disabled (HackMD API has a 100KB payload limit).
 
-    payload: dict = {"readPermission": "owner", "writePermission": "owner"}
-    if args.title:
-        payload["title"] = args.title
-    if content is not None:
-        payload["content"] = content
-
-    note = _api("POST", "/notes", token=token, data=payload)
-    nid = note.get("id", "?")
-    url = note.get("publishLink", f"https://hackmd.io/{nid}")
-    print(f"Created note: {nid}")
-    print(f"URL: {url}")
-    print("Tip: set permalink manually at the note's sharing settings.")
+Use GitHub Sync instead:
+  1. Edit homework/linux2026hackmd/linux2026-warmup.md locally
+  2. git add + commit + push to laneser/linux2026hackmd
+  3. In HackMD: Versions and GitHub Sync → Pull from GitHub
+"""
 
 
-def cmd_notes_update(args: argparse.Namespace) -> None:
-    """Update note content."""
-    token = _require_token()
-    content = args.content
-    if content is None:
-        if not sys.stdin.isatty():
-            content = sys.stdin.read()
-        else:
-            print("Error: provide --content or pipe content via stdin", file=sys.stderr)
-            sys.exit(1)
-
-    # Back up current remote content before overwriting.
-    note = _api("GET", f"/notes/{args.id}", token=token)
-    old_content = note.get("content", "") if isinstance(note, dict) else ""
-    if old_content:
-        from datetime import datetime
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup = Path(f"/tmp/hackmd_backup_{args.id}_{ts}.md")
-        backup.write_text(old_content)
-        print(f"Backup: {backup}")
-
-    _api("PATCH", f"/notes/{args.id}", token=token, data={"content": content})
-    print(f"Updated note: {args.id}")
+def cmd_notes_create(_args: argparse.Namespace) -> None:
+    print(_GITHUB_SYNC_MSG, file=sys.stderr)
+    sys.exit(1)
 
 
-def cmd_notes_delete(args: argparse.Namespace) -> None:
-    """Delete a note."""
-    if not args.yes:
-        print("Error: pass --yes to confirm deletion", file=sys.stderr)
-        sys.exit(1)
+def cmd_notes_update(_args: argparse.Namespace) -> None:
+    print(_GITHUB_SYNC_MSG, file=sys.stderr)
+    sys.exit(1)
 
-    token = _require_token()
-    _api("DELETE", f"/notes/{args.id}", token=token)
-    print(f"Deleted note: {args.id}")
+
+def cmd_notes_delete(_args: argparse.Namespace) -> None:
+    print(_GITHUB_SYNC_MSG, file=sys.stderr)
+    sys.exit(1)
 
 
 # ---------------------------------------------------------------------------

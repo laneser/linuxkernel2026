@@ -156,7 +156,7 @@ Notes 的核心價值不僅是技術結論，更是**學習者如何與 AI 協�
 
 HackMD 報告是公開發表的學習成果，具備教育意義，應讓其他學習者能從中學到東西。
 
-**書寫規範（強制）：** 所有發布至 HackMD 的內容，**必須嚴格遵守**課程書寫規範（見 `.claude/skills/hackmd/references/writing-conventions.md`）。撰寫前必須讀取該規範並逐條檢查。
+**書寫規範（強制）：** 所有發布至 HackMD 的內容，**必須嚴格遵守**以下書寫規範。
 
 **個人寫作風格：禁用** — 書寫規範明確要求「避免過多的個人色彩，用詞儘量中性」。因此撰寫 HackMD 內容時，**不得參考 `notes/writing_style.md`**，不得模仿個人書寫語氣。用詞應中性、客觀、專業。
 
@@ -180,10 +180,11 @@ HackMD 報告是公開發表的學習成果，具備教育意義，應讓其他�
 5. 學習者審核草稿，可直接在 HackMD 上修改或要求 Claude 修正
 6. 最終版本由學習者確認後發布
 
-**上傳紀律（強制）：**
-- **上傳 HackMD 時，必須直接使用 `notes/` 中學習者已審核的原文**，不得在上傳過程中自行改寫、刪減或重新整理內容。
-- 若 Claude 認為內容有問題（書寫規範、事實錯誤等），應**在上傳前告知學習者**，討論修改後再上傳，而非擅自改寫後上傳。
-- 學習者的審核是最終決定，Claude 不得在上傳環節繞過。
+**同步紀律（強制）：**
+- 報告原始檔位於 `homework/linux2026hackmd/linux2026-warmup.md`，Claude 直接編輯此檔案
+- 適當時機 commit + push 至 GitHub（`laneser/linux2026hackmd`），累積編修紀錄
+- 使用者透過 HackMD 的 **GitHub Sync** 功能（Versions and GitHub Sync → Pull from GitHub）將變更同步至 HackMD
+- HackMD API 有 100KB payload 限制，**不使用 API 上傳**；一律透過 GitHub sync
 
 ## 作業工作流程
 
@@ -192,21 +193,21 @@ HackMD 報告是公開發表的學習成果，具備教育意義，應讓其他�
 1. **Fork & Clone** — 使用 `gh` CLI fork 課程 repo，clone 至 `homework/` 目錄
 2. **開發** — 在 `homework/<repo>/` 內編輯、commit、push
 3. **測試** — 透過 SSH 同步至實體機進行編譯與效能測試（待設定）
-4. **撰寫報告** — 在 `notes/` 撰寫草稿，完成後透過 HackMD skill 發布
+4. **撰寫報告** — 直接編輯 `homework/linux2026hackmd/` 中的 markdown，commit + push 後由使用者在 HackMD 上 pull
 
 ```bash
 # Fork + clone
 gh repo fork sysprog21/lab0-c --clone=false
 gh repo clone <username>/lab0-c homework/lab0-c
 
-# 發布報告至 HackMD
-uv run .claude/skills/hackmd/scripts/hackmd.py notes create \
-  --title "lab0-c 開發紀錄" --content "$(cat notes/lab0-report-draft.md)"
+# 報告同步：編輯 → commit → push → 使用者在 HackMD 上 Pull from GitHub
+cd homework/linux2026hackmd
+git add linux2026-warmup.md && git commit -m "Update report" && git push
 ```
 
 - **`homework/`** — 作業 repo 的工作區（gitignored，僅 `README.md` 進 git）
+- **`homework/linux2026hackmd/`** — HackMD 報告 repo（獨立 git，同步至 `laneser/linux2026hackmd`）
 - **`gh` CLI** — DevContainer 已預裝，用於 GitHub 操作（fork, clone, PR）
-- **HackMD skill** — 透過 API 管理 HackMD 筆記，詳見 `.claude/skills/hackmd/SKILL.md`
 
 ## 慣例
 

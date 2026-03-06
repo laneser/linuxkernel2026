@@ -1,126 +1,69 @@
 ---
 name: hackmd
-description: "Interact with HackMD for reading and publishing notes. Use when the user wants to create, update, read, or list HackMD notes, publish homework reports, or manage their HackMD workspace. Triggers on: HackMD, 'publish report', 'create HackMD note', 'push to HackMD', 'list my notes'."
+description: "Interact with HackMD for reading notes and managing GitHub Sync workflow. Use when the user wants to read or list HackMD notes, or sync reports to HackMD via GitHub. Triggers on: HackMD, 'publish report', 'sync to HackMD', 'list my notes', 'push to HackMD'."
 ---
 
 # HackMD Integration
 
-Manage HackMD notes via the CLI at `.claude/skills/hackmd/scripts/hackmd.py`.
+Read-only HackMD API client + GitHub Sync workflow for publishing reports.
 
-## MANDATORY: Writing Conventions
+## Writing Conventions
 
-**所有發布至 HackMD 的內容，必須嚴格遵守書寫規範。** 在建立或更新筆記前，先讀取規範：
-
-```
-Read .claude/skills/hackmd/references/writing-conventions.md
-```
+所有發布至 HackMD 的內容，必須嚴格遵守書寫規範。完整規範見 `references/writing-conventions.md`。
 
 ### 關鍵規則（摘要）
 
-1. **用詞中性** — 避免個人色彩，**禁止參考 `notes/writing_style.md` 模仿個人語氣**
+1. **用詞中性** — 避免個人色彩
 2. **不加 `[TOC]`**
 3. **不變更 CSS / 佈景主題**
 4. **數學公式一律用 LaTeX** — `$...$` 行內、`$$...$$` 獨立；C 運算子須跳脫（`\%`、`\mathbin{\&}`）
 5. **程式碼區塊不加行號** — 用 `c` 而非 `c=`
-5. **只列關鍵程式碼** — 善用 `diff` 標示，完整程式碼放 GitHub
-6. **不濫用 `:::info` / `:::success` / `:::warning`** — `:::danger` 僅限老師
-7. **中文用全形標點** — 「，」而非 ","
-8. **術語遵循〈資訊科技詞彙翻譯〉** — 避免過多中英混用
-9. **不使用不必要的 emoji**
-10. **AI 使用須明確標示** — 並指出 AI 產出中的謬誤
+6. **只列關鍵程式碼** — 善用 `diff` 標示，完整程式碼放 GitHub
+7. **不濫用 `:::info` / `:::success` / `:::warning`** — `:::danger` 僅限老師
+8. **中文用全形標點** — 「，」而非 ","
+9. **術語遵循〈資訊科技詞彙翻譯〉及 L10N 詞彙對照表**
+10. **不使用不必要的 emoji**
+11. **AI 使用須明確標示** — 並指出 AI 產出中的謬誤
 
-違反任何規則的內容不得發布。完整規範見 `references/writing-conventions.md`。
-
-## Step 1: Check authentication
+## API 操作（唯讀）
 
 ```bash
+# 驗證登入狀態
 uv run .claude/skills/hackmd/scripts/hackmd.py auth status
-```
 
-**If not authenticated**, guide the user:
-
-1. Open https://hackmd.io/settings#api
-2. Create an API token
-3. Run login:
-   ```bash
-   uv run .claude/skills/hackmd/scripts/hackmd.py auth login
-   ```
-
-Token is stored at `~/.config/hackmd/token` (mode 0600).
-
-## Step 2: Perform the requested operation
-
-### List notes
-
-```bash
+# 列出筆記
 uv run .claude/skills/hackmd/scripts/hackmd.py notes list
-```
 
-### Read a note
-
-```bash
+# 讀取筆記內容
 uv run .claude/skills/hackmd/scripts/hackmd.py notes get <note-id>
 ```
 
-### Create a note
-
-From arguments:
+首次使用需登入：到 https://hackmd.io/settings#api 取得 API token，然後：
 ```bash
-uv run .claude/skills/hackmd/scripts/hackmd.py notes create --title "Title" --content "# Content"
+uv run .claude/skills/hackmd/scripts/hackmd.py auth login
 ```
 
-From a local file:
-```bash
-uv run .claude/skills/hackmd/scripts/hackmd.py notes create --title "Title" --content "$(cat path/to/file.md)"
-```
+## 發布報告：GitHub Sync 工作流程
 
-**Permalink:** The HackMD API does not reliably support setting permalinks programmatically. After creating a note, the user should set the permalink manually via the note's sharing settings on HackMD.
+HackMD API 有 **100KB payload 限制**，中文 markdown 超過約 42,000 字元就無法透過 API 上傳。改用 GitHub Sync：
 
-### Update a note
-
-```bash
-uv run .claude/skills/hackmd/scripts/hackmd.py notes update <note-id> --content "$(cat path/to/file.md)"
-```
-
-### Delete a note
+1. **Claude 編輯** `homework/linux2026hackmd/linux2026-warmup.md`
+2. **commit + push** 至 GitHub（`laneser/linux2026hackmd`）
+3. **使用者在 HackMD** 上操作：Versions and GitHub Sync → Pull from GitHub
 
 ```bash
-uv run .claude/skills/hackmd/scripts/hackmd.py notes delete <note-id> --yes
+cd homework/linux2026hackmd
+git add linux2026-warmup.md
+git commit -m "Update report"
+git push
 ```
 
-## Recommended workflow: homework report
-
-課程作業報告的建議流程：
-
-1. **在 `notes/` 撰寫草稿** — 先在本地用 Markdown 撰寫，Claude 可協助修改
-2. **發布至 HackMD** — 完成後用 `notes create` 發布
-3. **後續更新** — 用 `notes update` 同步修改
-
-```bash
-# 從本地草稿發布
-uv run .claude/skills/hackmd/scripts/hackmd.py notes create \
-  --title "lab0-c 開發紀錄" \
-  --content "$(cat notes/lab0-report-draft.md)"
-
-# 更新已發布的筆記
-uv run .claude/skills/hackmd/scripts/hackmd.py notes update <note-id> \
-  --content "$(cat notes/lab0-report-draft.md)"
-```
-
-## API 限制：大型筆記無法透過 API 更新
-
-HackMD API（`PATCH /notes/{noteId}`）只支援 `content` 全文替換，不支援 diff/partial update，也不支援 gzip 壓縮。Content-Type 限定 `application/json`。
-
-中文內容在 UTF-8 編碼下每字元佔 3 bytes，加上 JSON 轉義（`\n`、`\"`、`\\`），實際 HTTP payload 約為字元數的 2.4 倍。實測伺服器的 HTTP body 限制約 **100KB**，對應約 **42,000 字元**的中文 markdown。
-
-**當更新失敗（HTTP 500）時：**
-1. 告知使用者筆記已超過 API 上傳限制
-2. 提醒使用者從本地 `notes/` 手動複製貼上至 HackMD 網頁編輯器
-3. **本地 `notes/` 檔案始終是內容的主要編輯對象**，HackMD 是發布管道
+此流程同時解決兩個問題：
+- **無大小限制** — GitHub 不受 100KB 限制
+- **編修紀錄** — 每次 commit 都是一筆可追溯的編輯紀錄，滿足課程要求
 
 ## Guidelines
 
 - 發布前提醒使用者檢查 AI 使用揭露（見 `docs/references/ai-guidelines.md`）
-- Note 預設權限為 owner-only（readPermission / writePermission）
 - HackMD API 有 rate limit，避免頻繁呼叫
-- 大量內容建議先存檔再用 `--content "$(cat ...)"` 發布，避免 shell 引號問題
+- create/update/delete 命令已停用，執行時會提示使用 GitHub Sync
