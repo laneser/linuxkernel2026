@@ -64,6 +64,7 @@
 | `linux-kernel-module.md` | Linux kernel module 深入機制分析 |
 | `linux-perf.md` | 運用 Perf 分析程式效能並改善 |
 | `lkmpg.md` | Linux Kernel Module Programming Guide |
+| `l10n-glossaries.md` | L10N TW 英中詞彙對照表（型別、算繪、鏈結串列等） |
 
 **維護要求：** 新增、刪除或重新命名 `docs/references/` 中的檔案時，必須同步更新上方索引表。索引不同步會導致 Claude 找不到已有的參考資料或引用已刪除的檔案。
 
@@ -142,6 +143,15 @@ Notes 的核心價值不僅是技術結論，更是**學習者如何與 AI 協�
 
 這種格式能展現 **substantial personal contribution**（課程 AI 使用規範要求），證明學習者主導了方向決策，而非被動接受 AI 輸出。
 
+#### 對話回顧紀律（強制）
+
+**每次 session 告一段落時，Claude 必須將該次對話的互動過程寫入 `notes/`。** 這是為了讓日後撰寫 HackMD 報告時有原始素材可依循。
+
+- **時機** — 使用者說「今天先這樣」「先到這」「commit」等結束信號時，主動將本次討論寫入 notes
+- **內容** — 不只是技術結論，更要記錄互動過程：學習者的提問與初步想法、Claude 的分析與發現、學習者的決策與修正、最終結果
+- **格式** — 依照上方「步驟 N」格式，按討論順序記錄每個主題的互動脈絡
+- **位置** — 寫入對應的 notes 檔案（如 `notes/linux2026-warmup.md`），與技術答案分開或穿插皆可，但互動過程不可省略
+
 #### HackMD 報告撰寫規範
 
 HackMD 報告是公開發表的學習成果，具備教育意義，應讓其他學習者能從中學到東西。
@@ -204,9 +214,18 @@ uv run .claude/skills/hackmd/scripts/hackmd.py notes create \
 - 程式碼註解與 commit message 使用英文
 - 協助課程作業時，須留意 [`docs/references/ai-guidelines.md`](docs/references/ai-guidelines.md) 中的 AI 使用規範：AI 僅作為輔助，學習者須展現 **substantial personal contribution**；必要時提醒使用者注意引用揭露與開發過程文件化
 
+### 證據紀律（強制）
+
+**所有技術主張都必須有憑據。** 此規則適用於一切產出（notes、HackMD 報告、討論回覆），不僅限於 HackMD。
+
+- **禁止無出處的斷言** — 不得寫「X 大量使用 Y」「Z 是常見做法」等籠統說法。每個主張都必須附上具體出處：原始碼路徑與行號、規格書章節、實驗輸出、官方文件 URL 等。
+- **寫之前先驗證** — 透過 Grep/Read 搜尋原始碼、查閱規格書、或執行實驗，確認事實正確後才落筆。
+- **無法提供憑據就不寫** — 若找不到第一手來源支持某個主張，寧可不寫，也不可用「常見」「眾所皆知」等說法帶過。
+- **Linux 核心相關主張** — 必須附上具體檔案路徑（如 `include/linux/fs.h:123`）或 commit hash。不可僅說「Linux 核心大量使用」而不提供實例。
+
 ### 術語規範
 
-撰寫中文技術文件時，使用以下術語（詳見 [`docs/references/it-vocabulary.md`](docs/references/it-vocabulary.md)）：
+撰寫中文技術文件時，使用以下術語（詳見 [`docs/references/it-vocabulary.md`](docs/references/it-vocabulary.md) 及 [`docs/references/l10n-glossaries.md`](docs/references/l10n-glossaries.md)）：
 
 | English | 中文 | 避免 |
 |---------|------|------|
@@ -223,6 +242,7 @@ uv run .claude/skills/hackmd/scripts/hackmd.py notes create \
 | socket | socket | ~~插座~~ |
 | function | 函式 | 數學語境用「函數」 |
 | implement | 實作 | |
+| type | 型別 | ~~型態~~ |
 | immutable | 不可變 | 區別 constant（常數） |
 | atomic | 不可再分的 | ~~原子操作~~ |
 | operator / operand | 運算子 / 運算元 | |

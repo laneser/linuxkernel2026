@@ -1,5 +1,5 @@
 > **原始出處：** https://hackmd.io/@sysprog/linux2026-warmup
-> **擷取日期：** 2026-03-01
+> **擷取日期：** 2026-03-06
 > **用途：** 第一週作業 (warmup) 完整要求
 > **涵蓋度：** 完整
 
@@ -69,7 +69,7 @@ tags: linux2026
 * 為何計算機的加法在固定 $k$ 位元下，本質等價於 $\mathbb{Z}/2^k\mathbb{Z}$ 上的加法？
 * 為何「允許溢位」反而保證封閉性？若不允許溢位，會破壞哪些群的性質？
 * 在質數模數 $p$ 下，可用 $a^{-1} \equiv a^{p-2} \pmod p$ 計算反元素，解釋該式如何來自有限群理論，並說明為何此性質僅在「非零元素形成群」時成立。從 Linux 核心實作角度分析: 1) 為何必須確保輸入元素為單位？2) 若傳入零因子會造成什麼風險？
-* 為何 $x % 2^n \equiv x & (2^n - 1)$ 僅對 unsigned 或非負整數安全？從 CVE/CWE 找到相關資訊安全的議題
+* 為何 $x \mod 2^n \equiv x \& (2^n - 1)$ 僅對 unsigned 或非負整數安全？從 CVE/CWE 找到相關資訊安全的議題
 * 為何 sign extension 僅在「跨圓環」搬移時才有意義？從數學觀點解釋，要一般化相關證明
 * 為何 Linux 核心中 unsigned overflow 是 defined behavior，但 signed overflow 是 undefined behavior？
 * 為何 Linux 核心大量使用 unsigned long 作為時間計數器？
@@ -87,7 +87,7 @@ tags: linux2026
         > The value of a pointer becomes indeterminate when the object it points to reaches the end of its lifetime. 
 * 以下程式的輸出為何？ `int a[3] = {1,2,3}; int *p = a; printf("%zu %zu\n", sizeof(a), sizeof(p));`
     1. 為何 array 在 expression 中會 decay 成 pointer，但在 sizeof 中不會？
-    2. 為何 `&a` 與 `a` 的值相同但型態不同？
+    2. 為何 `&a` 與 `a` 的值相同但型別不同？
     3. 用 Graphviz 繪製記憶體示意圖說明以上
 * 分析： `double x[3]; int *p = (int *)&x[0]; printf("%d\n", *(p+1));`
     1. 為何 pointer arithmetic 的單位取決於 type？
@@ -156,7 +156,7 @@ tags: linux2026
     2. 若先 `free` 再改鏈結會發生什麼？
     3. 為何 AddressSanitizer 能偵測？
     4. 若在 `-O3` 下編譯器是否可能出現指令的 reorder？
-* 為何針對鏈結串列的節點走訪 (linked list traversal) 難以被 hardware prefetcher 預測？若使用 `__builtin_prefetch(node->next);` 是否一定改善效能？請記憶體存取圖形角度解釋，並從 git log 探討 Linux 核心的 List API 一度採用 prefetcher 又棄置的考量。
+* 為何針對鏈結串列的節點走訪 (linked list traversal) 難以被 hardware prefetcher 預測？若使用 `__builtin_prefetch(node->next);` 是否一定改善效能？請記憶體存取的行為模式來解釋，並從 git log 探討 Linux 核心的 List API 一度採用 prefetcher 又棄置的考量。
 * 針對 Linux 的 merge sort 設計，回答
     1. 為何 list_sort 是 stable？
     2. 為何不使用 quicksort？
