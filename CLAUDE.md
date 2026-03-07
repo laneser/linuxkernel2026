@@ -109,7 +109,7 @@ Claude 處理參考文件時的行為：
 本專案使用 Markdown checkbox 追蹤學習進度（詳見 [`docs/ARC42.md`](docs/ARC42.md) §5）：
 
 - **通用模板：** [`docs/learning-checklist.md`](docs/learning-checklist.md)（git tracked）— 定義所有學習項目
-- **個人進度：** `.learning-progress.md`（gitignored）— 使用者的完成狀態與筆記
+- **個人進度：** `homework/.learning-progress.md`（gitignored）— 使用者的完成狀態與筆記
 
 Claude 可讀取個人進度，根據學習狀態建議下一步方向。模板更新時，協助將新項目 merge 進個人進度。
 
@@ -181,32 +181,38 @@ HackMD 報告是公開發表的學習成果，具備教育意義，應讓其他�
 6. 最終版本由學習者確認後發布
 
 **同步紀律（強制）：**
-- 報告原始檔位於 `homework/linux2026hackmd/linux2026-warmup.md`，Claude 直接編輯此檔案
-- 適當時機 commit + push 至 GitHub（`laneser/linux2026hackmd`），累積編修紀錄
+- 報告 markdown 與程式碼放在同一個作業 repo 中（詳見下方「作業工作流程」），Claude 直接編輯該檔案
+- 適當時機 commit + push 至 GitHub，累積編修紀錄
 - 使用者透過 HackMD 的 **GitHub Sync** 功能（Versions and GitHub Sync → Pull from GitHub）將變更同步至 HackMD
 - HackMD API 有 100KB payload 限制，**不使用 API 上傳**；一律透過 GitHub sync
 
 ## 作業工作流程
 
-課程作業的 fork → 開發 → 報告完整流程：
+課程作業的開發 → 報告完整流程：
 
-1. **Fork & Clone** — 使用 `gh` CLI fork 課程 repo，clone 至 `homework/` 目錄
-2. **開發** — 在 `homework/<repo>/` 內編輯、commit、push
+### 標準流程（從下次作業起適用）
+
+每次作業建立一個 `linux2026_<topic>` repo（如 `linux2026_lab0`），**程式碼與 HackMD 報告 markdown 放在同一個 repo**，上傳至 GitHub 後透過 HackMD GitHub Sync 同步。
+
+1. **建立 repo** — 在 GitHub 建立 `linux2026_<topic>` repo，clone 至 `homework/linux2026_<topic>/`
+2. **開發** — 程式碼與報告 markdown 都在此目錄內編輯、commit、push
 3. **測試** — 透過 SSH 同步至實體機進行編譯與效能測試（待設定）
-4. **撰寫報告** — 直接編輯 `homework/linux2026hackmd/` 中的 markdown，commit + push 後由使用者在 HackMD 上 pull
+4. **報告同步** — commit + push 後，使用者在 HackMD 上 Pull from GitHub
+5. **例外** — 若 `homework/work.md` 有特別指定不同的目錄結構（如 warmup 作業），則依其指示
 
 ```bash
-# Fork + clone
-gh repo fork sysprog21/lab0-c --clone=false
-gh repo clone <username>/lab0-c homework/lab0-c
-
-# 報告同步：編輯 → commit → push → 使用者在 HackMD 上 Pull from GitHub
-cd homework/linux2026hackmd
-git add linux2026-warmup.md && git commit -m "Update report" && git push
+# 標準流程範例
+gh repo create laneser/linux2026_lab0 --private --clone
+cd homework/linux2026_lab0
+# 程式碼和報告 markdown 都在這裡
+git add . && git commit -m "Update" && git push
 ```
 
+### 共用設定
+
 - **`homework/`** — 作業 repo 的工作區（gitignored，僅 `README.md` 進 git）
-- **`homework/linux2026hackmd/`** — HackMD 報告 repo（獨立 git，同步至 `laneser/linux2026hackmd`）
+- **`homework/.learning-progress.md`** — 個人學習進度（gitignored）
+- **`homework/work.md`** — 作業特殊指示（若有）
 - **`gh` CLI** — DevContainer 已預裝，用於 GitHub 操作（fork, clone, PR）
 
 ## 慣例
