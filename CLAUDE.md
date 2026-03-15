@@ -65,6 +65,7 @@
 | `linux-perf.md` | 運用 Perf 分析程式效能並改善 |
 | `lkmpg.md` | Linux Kernel Module Programming Guide |
 | `l10n-glossaries.md` | L10N TW 英中詞彙對照表（型別、算繪、鏈結串列等） |
+| `c-function.md` | 你所不知道的 C 語言：函式呼叫篇 |
 
 **維護要求：** 新增、刪除或重新命名 `docs/references/` 中的檔案時，必須同步更新上方索引表。索引不同步會導致 Claude 找不到已有的參考資料或引用已刪除的檔案。
 
