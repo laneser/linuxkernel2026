@@ -10,5 +10,12 @@
 		"ghcr.io/stu-bell/devcontainer-features/claude-code:0": {}
 	},
 
-	"remoteUser": "vscode"
+	"remoteUser": "vscode",
+
+	// Enable hardware performance counters for perf stat
+	"runArgs": [
+		"--cap-add=SYS_PTRACE",
+		"--cap-add=SYS_ADMIN",
+		"--security-opt", "seccomp=unconfined"
+	]
 }
