@@ -67,6 +67,8 @@
 | `l10n-glossaries.md` | L10N TW 英中詞彙對照表（型別、算繪、鏈結串列等） |
 | `c-function.md` | 你所不知道的 C 語言：函式呼叫篇 |
 | `linux2026-stdc.md` | 第二週作業 (stdc) 完整要求 |
+| `linux2026-basics.md` | 第三週作業 (basics) 完整要求 |
+| `linux2026-finite-field.md` | 有限體算術與 $2^k$ 索引 (basics 指定閱讀教材) |
 
 **維護要求：** 新增、刪除或重新命名 `docs/references/` 中的檔案時，必須同步更新上方索引表。索引不同步會導致 Claude 找不到已有的參考資料或引用已刪除的檔案。
 
@@ -108,12 +110,16 @@ Claude 處理參考文件時的行為：
 
 ## 學習進度追蹤
 
-本專案使用 Markdown checkbox 追蹤學習進度（詳見 [`docs/ARC42.md`](docs/ARC42.md) §5）：
+本專案使用 **`wiki/linux2026/`** 作為學習知識庫與進度追蹤的核心機制（詳見 llm-wiki skill）。
 
-- **通用模板：** [`docs/learning-checklist.md`](docs/learning-checklist.md)（git tracked）— 定義所有學習項目
-- **個人進度：** `homework/.learning-progress.md`（gitignored）— 使用者的完成狀態與筆記
+Wiki 優於 checkbox 的原因：checkbox 是二元的（做了/沒做），無法表達理解深度、知識缺口與概念間的連結。Wiki 透過 source 摘要、concept 合成、以及**自我評估筆記**（「看懂什麼、看不懂什麼、缺什麼先備知識」）來記錄真實的知識狀態。
 
-Claude 可讀取個人進度，根據學習狀態建議下一步方向。模板更新時，協助將新項目 merge 進個人進度。
+- **知識庫：** `wiki/linux2026/`（獨立 local git repo）— 教材摘要、概念合成、自我評估
+- **操作方式：** 使用 `/llm-wiki` skill 進行 ingest / query / lint
+
+每次讀完教材後，Claude 應鼓勵學習者記錄自我評估，存為 wiki source note。
+
+> **已棄用：** `docs/learning-checklist.md` 模板與 `homework/.learning-progress.md` 不再維護。
 
 ### 學習筆記
 
@@ -213,8 +219,8 @@ git add . && git commit -m "Update" && git push
 ### 共用設定
 
 - **`homework/`** — 作業 repo 的工作區（gitignored，僅 `README.md` 進 git）
-- **`homework/.learning-progress.md`** — 個人學習進度（gitignored）
 - **`homework/work.md`** — 作業特殊指示（若有）
+- **`wiki/linux2026/`** — 學習知識庫（獨立 local git repo，見「學習進度追蹤」）
 - **`gh` CLI** — DevContainer 已預裝，用於 GitHub 操作（fork, clone, PR）
 
 ## 慣例
