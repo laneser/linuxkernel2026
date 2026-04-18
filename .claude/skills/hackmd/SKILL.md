@@ -1,89 +1,103 @@
 ---
 name: hackmd
-description: "Interact with HackMD for reading notes and managing GitHub Sync workflow. Use when the user wants to read or list HackMD notes, or sync reports to HackMD via GitHub. Triggers on: HackMD, 'publish report', 'sync to HackMD', 'list my notes', 'push to HackMD'."
+description: "HackMD read-only API client + writing-conventions checker for homework hackmd.md files. Use when reading HackMD notes, syncing reports via GitHub Sync, or writing/reviewing any file destined for HackMD (typically homework/*/hackmd.md). Triggers on: HackMD, 'publish report', 'sync to HackMD', 'list my notes', editing homework hackmd.md."
 ---
 
 # HackMD Integration
 
-Read-only HackMD API client + GitHub Sync workflow for publishing reports.
+Two responsibilities:
 
-## Writing Conventions
+1. **Read-only API access** — list and fetch HackMD notes via CLI
+2. **Writing convention enforcement** — keep `hackmd.md` output compatible with HackMD's KaTeX + Markdown renderer and the course's style rules
 
-所有發布至 HackMD 的內容，必須嚴格遵守書寫規範。完整規範見 `references/writing-conventions.md`。
+**Publishing is always via GitHub Sync** (push to GitHub, pull from HackMD manually). API upload was removed because the 100 KB payload limit makes it unreliable for real reports and it hides edit history.
 
-### 關鍵規則（摘要）
+## When to invoke this skill
 
-1. **用詞中性** — 避免個人色彩
-2. **不加 `[TOC]`**
-3. **不變更 CSS / 佈景主題**
-4. **數學公式一律用 LaTeX** — `$...$` 行內、`$$...$$` 獨立；C 運算子須跳脫（`\%`、`\mathbin{\&}`）
-5. **程式碼區塊不加行號** — 用 `c` 而非 `c=`
-6. **只列關鍵程式碼** — 善用 `diff` 標示，完整程式碼放 GitHub
-7. **不濫用 `:::info` / `:::success` / `:::warning`** — `:::danger` 僅限老師
-8. **中文用全形標點** — 「，」而非 ","
-9. **術語遵循〈資訊科技詞彙翻譯〉及 L10N 詞彙對照表**
-10. **不使用不必要的 emoji**
-11. **AI 使用須明確標示** — 並指出 AI 產出中的謬誤
+- User reads or lists HackMD notes, or mentions syncing/publishing a report
+- Any edit to a file that will be synced to HackMD (typically `homework/*/hackmd.md`) — consult `references/writing-conventions.md` before and after editing to avoid HackMD-specific pitfalls
 
-## API 操作（唯讀）
+## Writing conventions (must read before editing hackmd.md)
 
-```bash
-# 驗證登入狀態
-uv run .claude/skills/hackmd/scripts/hackmd.py auth status
+Full checklist: `references/writing-conventions.md`. Highlights below.
 
-# 列出筆記
-uv run .claude/skills/hackmd/scripts/hackmd.py notes list
+### Course style rules
 
-# 讀取筆記內容
-uv run .claude/skills/hackmd/scripts/hackmd.py notes get <note-id>
-```
+1. **Neutral voice** — no personal tone; subjective reflection goes to `notes/`, not hackmd.md
+2. **No `[TOC]`** — HackMD's built-in TOC is sufficient
+3. **No CSS / theme overrides**
+4. **Math in LaTeX only** (`$...$` inline, `$$...$$` display); escape C operators: `\%`, `\mathbin{\&}`
+5. **Code blocks without line numbers** — use ` ```c `, not ` ```c= `
+6. **Key snippets only** — full code on GitHub, not pasted in HackMD
+7. **No casual `:::info`/`:::success`/`:::warning`**; `:::danger` reserved for instructor
+8. **Full-width Chinese punctuation** — 「，」not `,`
+9. **Terminology per 〈資訊科技詞彙翻譯〉 and L10N glossary**
+10. **No emoji unless required**
+11. **AI use disclosed** — and flag inaccuracies in AI output
 
-首次使用需登入：到 https://hackmd.io/settings#api 取得 API token，然後：
-```bash
-uv run .claude/skills/hackmd/scripts/hackmd.py auth login
-```
+### HackMD KaTeX pitfalls (avoid these)
 
-## 發布報告：GitHub Sync 工作流程
+HackMD's renderer is KaTeX, which has stricter edge cases than MathJax. The most common traps:
 
-HackMD API 有 **100KB payload 限制**，中文 markdown 超過約 42,000 字元就無法透過 API 上傳。改用 GitHub Sync：
+- **`\text{...\_...}` renders the backslash literally** in HackMD. Inside `\text{}` the underscore escape breaks. Workaround: define a short symbol (e.g. $h$) in surrounding prose and keep the math LaTeX-only; or write the identifier with Markdown backticks outside the math
+- **C operators collide with LaTeX**: unescaped `%` starts a LaTeX comment (rest of line eaten); unescaped `&` is a table/alignment separator. Always use `\%`, `\&`, or `\mathbin{\&}` for bitwise-AND spacing
+- **Double backslash line breaks inside `$$...$$`** need `\\\\` in some contexts — prefer splitting into multiple `$$...$$` blocks
+- **`\boxed{...}` works**; prefer over custom framing
+- **Chinese in `\text{}` is fine**, but the `\_` trap above still applies
 
-1. **Claude 編輯** `homework/linux2026hackmd/linux2026-warmup.md`
-2. **commit + push** 至 GitHub（`laneser/linux2026hackmd`）
-3. **使用者在 HackMD** 上操作：Versions and GitHub Sync → Pull from GitHub
+If you must refer to a function name like `hash_64` inside math, define `h := hash_64(·, b)` in prose and use `h` in the math.
 
-```bash
-cd homework/linux2026hackmd
-git add linux2026-warmup.md
-git commit -m "Update report"
-git push
-```
+## Publishing workflow: GitHub Sync
 
-此流程同時解決兩個問題：
-- **無大小限制** — GitHub 不受 100KB 限制
-- **編修紀錄** — 每次 commit 都是一筆可追溯的編輯紀錄，滿足課程要求
+1. Edit `homework/<topic>/hackmd.md` locally
+2. `git add hackmd.md && git commit -m "..." && git push`
+3. In HackMD: **Versions and GitHub Sync → Pull from GitHub**
 
-## HackMD Anchor（內部連結）格式
+Benefits:
 
-HackMD 自動為每個標題生成 anchor，規則如下：
+- No 100 KB payload limit
+- Every commit is a tracked edit, satisfying the course's edit-history requirement
+- GitHub remains the single source of truth; HackMD is just a rendered mirror
 
-1. **轉小寫**（英文部分）
-2. **空格轉 `-`**
-3. **中文、全形標點原樣保留**（包括 `：`、`（`、`）` 等）
-4. **移除半形特殊字元**（`()`、`.`、`,` 等），但 `-` 保留
-5. **數字前綴保留** — 標題 `#### 2. 為何不使用 quicksort` 的 anchor 是 `#2-為何不使用-quicksort`
+## HackMD anchor format (internal links)
 
-範例：
+HackMD generates anchors from headings as follows:
 
-| 標題 | Anchor |
-|------|--------|
+1. Lowercase English portions
+2. Spaces → `-`
+3. Chinese and full-width punctuation kept as-is (`：`, `（`, `）`, etc.)
+4. Half-width special chars stripped (`()`, `.`, `,` etc.); `-` kept
+5. Number prefixes preserved — `#### 2. 為何不使用 quicksort` → `#2-為何不使用-quicksort`
+
+Examples:
+
+| Heading | Anchor |
+|---------|--------|
 | `### 鏈結串列 O(1) vs 陣列 O(n)：量化分析` | `#鏈結串列-O1-vs-陣列-On：量化分析` |
 | `#### 2. 為何不使用 quicksort` | `#2-為何不使用-quicksort` |
 | `## Linux 核心原始碼中的搜尋結果` | `#Linux-核心原始碼中的搜尋結果` |
 
-撰寫內部連結時，直接用 `[顯示文字](#anchor)` 格式。如果不確定 anchor，以上述規則推導，或在 HackMD 上用 TOC 複製。
+Write internal links as `[顯示文字](#anchor)`.
+
+## Source citations
+
+- Cite Linux kernel code with a version-tagged GitHub URL: `https://github.com/torvalds/linux/blob/v<tag>/<path>#L<line>`
+- For homework-repo code (e.g. `golden_inv.c`), link to `https://github.com/<user>/<repo>/blob/main/<file>`
+- Snippets must faithfully reproduce the source; if abbreviated, mark what was omitted
+
+## Read-only API commands
+
+```bash
+uv run .claude/skills/hackmd/scripts/hackmd.py auth status
+uv run .claude/skills/hackmd/scripts/hackmd.py auth login      # first use
+uv run .claude/skills/hackmd/scripts/hackmd.py notes list
+uv run .claude/skills/hackmd/scripts/hackmd.py notes get <note-id>
+```
+
+Obtain an API token from https://hackmd.io/settings#api. Token is stored at `~/.config/hackmd/token` (mode 0600).
 
 ## Guidelines
 
-- 發布前提醒使用者檢查 AI 使用揭露（見 `docs/references/ai-guidelines.md`）
-- HackMD API 有 rate limit，避免頻繁呼叫
-- create/update/delete 命令已停用，執行時會提示使用 GitHub Sync
+- Before publishing, remind the user to check AI-use disclosure (`docs/references/ai-guidelines.md`)
+- HackMD API has rate limits; avoid frequent calls
+- Create/update/delete commands are intentionally absent — only GitHub Sync is supported

@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""HackMD CLI — read-only client using stdlib only.
+"""HackMD read-only CLI — stdlib only.
 
 Usage:
-    hackmd.py auth login          Prompt for API token, verify, and save
+    hackmd.py auth login          Prompt for API token, verify, save
     hackmd.py auth status         Show current authentication status
     hackmd.py notes list          List your notes
     hackmd.py notes get <id>      Print note content (Markdown)
 
-Note: create/update/delete removed due to HackMD API 100KB payload limit.
-Use GitHub Sync instead: edit locally, commit+push to GitHub, then pull
-from GitHub in HackMD (Versions and GitHub Sync → Pull from GitHub).
+Writing to HackMD is intentionally unsupported. The HackMD API has a
+100KB payload limit which makes it unreliable for real reports, and
+the course requires a visible edit history. Instead, edit the report
+locally, commit+push to GitHub, and pull from GitHub inside HackMD
+(Versions and GitHub Sync → Pull from GitHub).
 
 Configuration:
     Token is stored at ~/.config/hackmd/token (mode 0600).
@@ -20,7 +22,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import stat
 import sys
 import textwrap
@@ -59,17 +60,11 @@ def _require_token() -> str:
     return token
 
 
-def _api(method: str, path: str, *, token: str, data: dict | None = None) -> dict | list | str:
-    """Perform an API request. Returns parsed JSON or empty string on 204."""
+def _get(path: str, *, token: str) -> dict | list | str:
+    """GET request. Returns parsed JSON or empty string on 204."""
     url = f"{API_BASE}{path}"
-    body = json.dumps(data).encode() if data is not None else None
-    req = urllib.request.Request(url, data=body, method=method)
+    req = urllib.request.Request(url, method="GET")
     req.add_header("Authorization", f"Bearer {token}")
-    if body is not None:
-        req.add_header("Content-Type", "application/json")
-        if len(body) > 50_000:
-            req.data = gzip.compress(body)
-            req.add_header("Content-Encoding", "gzip")
 
     try:
         with urllib.request.urlopen(req) as resp:
@@ -95,8 +90,7 @@ def cmd_auth_login(_args: argparse.Namespace) -> None:
         print("Error: empty token", file=sys.stderr)
         sys.exit(1)
 
-    # Verify by calling /me
-    me = _api("GET", "/me", token=token)
+    me = _get("/me", token=token)
     _save_token(token)
     name = me.get("name", me.get("email", "unknown"))
     print(f"Authenticated as: {name}")
@@ -109,7 +103,7 @@ def cmd_auth_status(_args: argparse.Namespace) -> None:
     if not token:
         print("Not authenticated. Run: hackmd.py auth login")
         return
-    me = _api("GET", "/me", token=token)
+    me = _get("/me", token=token)
     name = me.get("name", me.get("email", "unknown"))
     teams = ", ".join(t.get("name", "?") for t in me.get("teams", []))
     print(f"Authenticated as: {name}")
@@ -124,20 +118,18 @@ def cmd_auth_status(_args: argparse.Namespace) -> None:
 def cmd_notes_list(_args: argparse.Namespace) -> None:
     """List notes in a table."""
     token = _require_token()
-    notes = _api("GET", "/notes", token=token)
+    notes = _get("/notes", token=token)
 
     if not notes:
         print("No notes found.")
         return
 
-    # Table output
     print(f"{'ID':<22} {'Title':<50} {'Updated'}")
     print("-" * 90)
     for n in notes:
         nid = n.get("id", "?")
         title = (n.get("title") or "(untitled)")[:50]
         updated = n.get("lastChangedAt", n.get("createdAt", "?"))
-        # Truncate ISO timestamp to date+time
         if isinstance(updated, int):
             from datetime import datetime, timezone
             updated = datetime.fromtimestamp(updated / 1000, tz=timezone.utc).strftime("%Y-%m-%d %H:%M")
@@ -151,34 +143,9 @@ def cmd_notes_list(_args: argparse.Namespace) -> None:
 def cmd_notes_get(args: argparse.Namespace) -> None:
     """Print note content."""
     token = _require_token()
-    note = _api("GET", f"/notes/{args.id}", token=token)
+    note = _get(f"/notes/{args.id}", token=token)
     content = note.get("content", "")
     print(content)
-
-
-_GITHUB_SYNC_MSG = """\
-create/update/delete are disabled (HackMD API has a 100KB payload limit).
-
-Use GitHub Sync instead:
-  1. Edit homework/linux2026hackmd/linux2026-warmup.md locally
-  2. git add + commit + push to laneser/linux2026hackmd
-  3. In HackMD: Versions and GitHub Sync → Pull from GitHub
-"""
-
-
-def cmd_notes_create(_args: argparse.Namespace) -> None:
-    print(_GITHUB_SYNC_MSG, file=sys.stderr)
-    sys.exit(1)
-
-
-def cmd_notes_update(_args: argparse.Namespace) -> None:
-    print(_GITHUB_SYNC_MSG, file=sys.stderr)
-    sys.exit(1)
-
-
-def cmd_notes_delete(_args: argparse.Namespace) -> None:
-    print(_GITHUB_SYNC_MSG, file=sys.stderr)
-    sys.exit(1)
 
 
 # ---------------------------------------------------------------------------
@@ -188,47 +155,30 @@ def cmd_notes_delete(_args: argparse.Namespace) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="hackmd.py",
-        description="Minimal HackMD API client (stdlib only)",
+        description="Minimal HackMD read-only API client (stdlib only)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=textwrap.dedent("""\
             Examples:
               hackmd.py auth login
+              hackmd.py auth status
               hackmd.py notes list
-              hackmd.py notes create --title "My Note" --content "# Hello"
               hackmd.py notes get <note-id>
-              echo "# Draft" | hackmd.py notes create --title "Draft"
-              hackmd.py notes update <note-id> --content "# Updated"
-              hackmd.py notes delete <note-id> --yes
+
+            To publish a report, use GitHub Sync (see SKILL.md).
         """),
     )
     sub = parser.add_subparsers(dest="group", help="Command group")
 
-    # -- auth --
     auth = sub.add_parser("auth", help="Authentication")
     auth_sub = auth.add_subparsers(dest="command")
     auth_sub.add_parser("login", help="Save and verify API token")
     auth_sub.add_parser("status", help="Show auth status")
 
-    # -- notes --
-    notes = sub.add_parser("notes", help="Note operations")
+    notes = sub.add_parser("notes", help="Note operations (read-only)")
     notes_sub = notes.add_subparsers(dest="command")
-
     notes_sub.add_parser("list", help="List your notes")
-
     get_p = notes_sub.add_parser("get", help="Get note content")
     get_p.add_argument("id", help="Note ID")
-
-    create_p = notes_sub.add_parser("create", help="Create a note")
-    create_p.add_argument("--title", help="Note title")
-    create_p.add_argument("--content", help="Note content (or pipe via stdin)")
-
-    update_p = notes_sub.add_parser("update", help="Update a note")
-    update_p.add_argument("id", help="Note ID")
-    update_p.add_argument("--content", help="New content (or pipe via stdin)")
-
-    delete_p = notes_sub.add_parser("delete", help="Delete a note")
-    delete_p.add_argument("id", help="Note ID")
-    delete_p.add_argument("--yes", action="store_true", help="Confirm deletion")
 
     return parser
 
@@ -238,9 +188,6 @@ DISPATCH = {
     ("auth", "status"): cmd_auth_status,
     ("notes", "list"): cmd_notes_list,
     ("notes", "get"): cmd_notes_get,
-    ("notes", "create"): cmd_notes_create,
-    ("notes", "update"): cmd_notes_update,
-    ("notes", "delete"): cmd_notes_delete,
 }
 
 
